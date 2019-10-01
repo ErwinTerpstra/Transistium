@@ -1,0 +1,6 @@
+Transistium/Library/
+Transistium/Temp/
+*.csproj
+Transistium/.vs/
+*.sln
+Transistium/Logs/
