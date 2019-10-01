@@ -1,7 +1,7 @@
 ﻿
 namespace Transistium.Design
 {
-	public struct Wire
+	public class Wire
 	{
 		public Junction a, b;
 

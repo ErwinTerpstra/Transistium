@@ -6,16 +6,16 @@ namespace Transistium.Design
 	{
 		public List<Transistor> transistors;
 
-		public Junction Vcc;
+		public Junction vcc;
 
-		public Junction Ground;
+		public Junction ground;
 		
 		public Circuit()
 		{
 			transistors = new List<Transistor>();
 
-			Vcc = new Junction();
-			Ground = new Junction();
+			vcc = new Junction();
+			ground = new Junction();
 		}
 	}
 

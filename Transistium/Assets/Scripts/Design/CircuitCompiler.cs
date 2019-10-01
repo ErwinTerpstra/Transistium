@@ -10,6 +10,11 @@ namespace Transistium.Design
 
 		private OneToManyMapping<int, Junction> junctionMapping;
 
+		public CircuitCompiler()
+		{
+			junctionMapping = new OneToManyMapping<int, Junction>();
+		}
+
 		public void Compile(Circuit circuit)
 		{
 			compiledCircuit = new Runtime.Circuit();
@@ -17,8 +22,8 @@ namespace Transistium.Design
 			// Collect all junctions in the circuit
 			List<Junction> allJunctions = new List<Junction>();
 
-			allJunctions.Add(circuit.Vcc);
-			allJunctions.Add(circuit.Ground);
+			allJunctions.Add(circuit.vcc);
+			allJunctions.Add(circuit.ground);
 
 			foreach (var transistor in circuit.transistors)
 				transistor.CollectJunctions(allJunctions);
@@ -45,9 +50,9 @@ namespace Transistium.Design
 			{
 				compiledCircuit.transistors.Add(new Runtime.Transistor()
 				{
-					gate = junctionMapping[transistor.gate],
-					drain = junctionMapping[transistor.drain],
-					source = junctionMapping[transistor.source],
+					gate	= junctionMapping[transistor.gate],
+					drain	= junctionMapping[transistor.drain],
+					source	= junctionMapping[transistor.source],
 				});
 			}
 		}
