@@ -1,9 +1,10 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 
 namespace Transistium.Design
 {
-	public class Transistor
+	public class Transistor : CircuitElement
 	{
 		public Junction gate;
 

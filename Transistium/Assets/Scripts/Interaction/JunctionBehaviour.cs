@@ -8,5 +8,11 @@ namespace Transistium.Interaction
 	public class JunctionBehaviour : MonoBehaviour
 	{
 		private Junction target;
+
+		public Junction Target
+		{
+			get => target;
+			set => target = value;
+		}
 	}
 }
