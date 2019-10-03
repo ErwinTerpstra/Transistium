@@ -8,11 +8,11 @@ namespace Transistium.Design
 	{
 		private Runtime.Circuit compiledCircuit;
 
-		private OneToManyMapping<int, Junction> junctionMapping;
+		private OneToManyMapping<int, Handle> junctionMapping;
 
 		public CircuitCompiler()
 		{
-			junctionMapping = new OneToManyMapping<int, Junction>();
+			junctionMapping = new OneToManyMapping<int, Handle>();
 		}
 
 		public void Compile(Circuit circuit)
@@ -20,33 +20,33 @@ namespace Transistium.Design
 			compiledCircuit = new Runtime.Circuit();
 
 			// Collect all junctions in the circuit
-			List<Junction> allJunctions = new List<Junction>();
+			List<Handle> allJunctions = new List<Handle>();
 
-			allJunctions.Add(circuit.vcc);
-			allJunctions.Add(circuit.ground);
+			allJunctions.Add(circuit.Vcc);
+			allJunctions.Add(circuit.Ground);
 
-			foreach (var transistor in circuit.transistors)
+			foreach (var transistor in circuit.Transistors)
 				transistor.CollectJunctions(allJunctions);
 
 			// Map all connected junctions to a single wire
-			List<Junction> connectedJunctions = new List<Junction>();
-			foreach (var junction in allJunctions)
+			List<Handle> connectedJunctions = new List<Handle>();
+			foreach (var junctionHandle in allJunctions)
 			{
-				if (junctionMapping.Contains(junction))
+				if (junctionMapping.Contains(junctionHandle))
 					continue;
 
 				int wire = compiledCircuit.AddWire();
 
 				// Collect connected junctions to this one
 				connectedJunctions.Clear();
-				junction.CollectConnectedJunctions(connectedJunctions);
+				circuit.CollectConnectedJunctions(junctionHandle, connectedJunctions);
 
 				// Store the created wire mapping for all connected junctions
 				junctionMapping.Map(wire, connectedJunctions);
 			}
 
 			// Create transistors
-			foreach (var transistor in circuit.transistors)
+			foreach (var transistor in circuit.Transistors)
 			{
 				compiledCircuit.transistors.Add(new Runtime.Transistor()
 				{

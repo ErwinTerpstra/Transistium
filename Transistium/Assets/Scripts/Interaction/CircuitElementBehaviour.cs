@@ -6,18 +6,26 @@ namespace Transistium.Interaction
 {
 	public class CircuitElementBehaviour : MonoBehaviour
 	{
-		private CircuitElement target;
+		[SerializeField]
+		private bool locked = false;
+
+		private CircuitElement element;
 
 		private void LateUpdate()
 		{
-			transform.localPosition = target.transform.position;
-			transform.localRotation = Quaternion.Euler(0, 0, -((int)target.transform.rotation) * 90);
+			if (!locked)
+			{
+				transform.localPosition = element.transform.position;
+				transform.localRotation = Quaternion.Euler(0, 0, -((int)element.transform.rotation) * 90);
+			}
 		}
 
-		public CircuitElement Target
+		public bool IsLocked => locked;
+
+		public CircuitElement Element
 		{
-			get => target;
-			set => target = value;
+			get => element;
+			set => element = value;
 		}
 
 	}

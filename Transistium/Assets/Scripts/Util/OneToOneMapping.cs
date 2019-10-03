@@ -15,6 +15,28 @@ namespace Transistium.Util
 			backward = new Dictionary<B, A>();
 		}
 
+		public void Remove(A a)
+		{
+			B b;
+
+			if (forward.TryGetValue(a, out b))
+			{
+				forward.Remove(a);
+				backward.Remove(b);
+			}
+		}
+
+		public void Remove(B b)
+		{
+			A a;
+
+			if (backward.TryGetValue(b, out a))
+			{
+				backward.Remove(b);
+				forward.Remove(a);
+			}
+		}
+
 
 		public void Map(A a, B b)
 		{

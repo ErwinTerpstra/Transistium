@@ -11,63 +11,92 @@ namespace Transistium.Interaction
 	{
 		private static readonly Rotation[] rotations = { Rotation.NONE, Rotation.ROTATE_90, Rotation.ROTATE_180, Rotation.ROTATE_270 };
 
+		private CircuitManager circuitManager;
+
+		private Circuit circuit;
+
 		private CircuitElementBehaviour currentElement;
 
-		private WireBehaviour currentConnection;
+		private WireBehaviour currentWire;
+
+		private void Start()
+		{
+			circuitManager = CircuitManager.Instance;
+			circuit = circuitManager.Circuit;
+		}
 
 		private Vector2 GetCircuitPosition(PointerEventData eventData)
 		{
-			return CircuitManager.Instance.GetCircuitPosition(eventData.pointerCurrentRaycast.worldPosition);
+			return circuitManager.GetCircuitPosition(eventData.pointerCurrentRaycast.worldPosition);
+		}
+		
+		private void StartWire(PointerEventData eventData, JunctionBehaviour junctionBehaviour)
+		{
+			var wireHandle = circuit.AddWire(junctionBehaviour.JunctionHandle);
+
+			currentWire = circuitManager.MapWire(wireHandle);
+
+			var wire = circuit.GetWire(currentWire.WireHandle);
+			wire.vertices.Add(GetCircuitPosition(eventData));
 		}
 
-		private void StartConnection(PointerEventData eventData, JunctionBehaviour junction)
+		private void EndWire(PointerEventData eventData, JunctionBehaviour junctionBehaviour)
 		{
-			currentConnection = CircuitManager.Instance.CreateTemporaryWire(junction.Target);
-			currentConnection.Target.vertices.Add(GetCircuitPosition(eventData));
+			var wire = circuit.GetWire(currentWire.WireHandle);
+			wire.b = junctionBehaviour.JunctionHandle;
+			wire.vertices.Clear();
+
+			var junction = circuit.GetJunction(junctionBehaviour.JunctionHandle);
+			junction.wires.Add(currentWire.WireHandle);
+			
+			currentWire = null;
 		}
 
-		private void EndConnection(PointerEventData eventData, JunctionBehaviour junction)
+		private void UpdateWire(PointerEventData eventData)
 		{
-			currentConnection.Target.b = junction.Target;
-			currentConnection.Target.vertices.Clear();
-
-			CircuitManager.Instance.StoreTemporaryWire(currentConnection);
-
-			currentConnection = null;
-		}
-
-		private void UpdateConnection(PointerEventData eventData)
-		{
-			currentConnection.Target.vertices[0] = GetCircuitPosition(eventData);
+			var wire = circuit.GetWire(currentWire.WireHandle);
+			wire.vertices[0] = GetCircuitPosition(eventData);
 		}
 
 		private void UpdateElement(PointerEventData eventData)
 		{
-			currentElement.transform.position = GetCircuitPosition(eventData);
+			currentElement.Element.transform.position = GetCircuitPosition(eventData);
 		}
 
 		private void HandleLeftClick(PointerEventData eventData)
 		{
+			var wireBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<WireBehaviour>();
 
-		}
+			if (wireBehaviour != null)
+			{
+				circuitManager.RemoveWire(wireBehaviour.WireHandle);
+				return;
+			}
 
-		private void HandleRightClick(PointerEventData eventData)
-		{
 			var circuitElement = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
 
 			if (circuitElement != null)
 			{
-				circuitElement.Target.transform.rotation = rotations[(Array.IndexOf(rotations, circuitElement.Target.transform.rotation) + 1) % rotations.Length];
+				circuitElement.Element.transform.rotation = rotations[(Array.IndexOf(rotations, circuitElement.Element.transform.rotation) + 1) % rotations.Length];
+				return;
 			}
-			else
-			{
-				var transistor = CircuitManager.Instance.AddTransistor();
-				transistor.transform.position = GetCircuitPosition(eventData);
-			}
+		}
+
+		private void HandleRightClick(PointerEventData eventData)
+		{
+			var transistorHandle = circuit.AddTransistor();
+			var transistor = circuit.GetTransistor(transistorHandle);
+
+			circuitManager.MapTransistor(transistorHandle);
+
+			transistor.transform.position = GetCircuitPosition(eventData);
 		}
 
 		public void OnPointerClick(PointerEventData eventData)
 		{
+			if (!eventData.eligibleForClick || Vector2.Distance(eventData.position, eventData.pressPosition) >= EventSystem.current.pixelDragThreshold)
+				return;
+
 			switch (eventData.button)
 			{
 				case PointerEventData.InputButton.Left:
@@ -87,41 +116,61 @@ namespace Transistium.Interaction
 
 		public void OnBeginDrag(PointerEventData eventData)
 		{
-			var junction = eventData.pointerPressRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
-
-			if (junction != null)
+			switch (eventData.button)
 			{
-				StartConnection(eventData, junction);
-				return;
-			}
+				case PointerEventData.InputButton.Left:
+					var elementBehaviour = eventData.pointerPressRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
 
-			var element = eventData.pointerPressRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
+					if (elementBehaviour != null && !elementBehaviour.IsLocked)
+						currentElement = elementBehaviour;
 
-			if (element != null)
-			{
-				currentElement = element;
-				return;
+					break;
+
+				case PointerEventData.InputButton.Right:
+					var junctionBehaviour = eventData.pointerPressRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
+
+					if (junctionBehaviour != null)
+						StartWire(eventData, junctionBehaviour);
+
+					break;
 			}
+			
 		}
 
 		public void OnEndDrag(PointerEventData eventData)
 		{
-			if (currentConnection != null)
+			if (currentWire != null)
 			{
-				var junction = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
+				var junctionBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
+				var wire = circuit.GetWire(currentWire.WireHandle);
 
-				if (junction != null)
-					EndConnection(eventData, junction);
+				if (junctionBehaviour != null)
+				{
+					if (!circuit.AreConnected(wire.a, junctionBehaviour.JunctionHandle))
+						EndWire(eventData, junctionBehaviour);
+					else
+						Destroy(currentWire.gameObject);
+				}
 				else
-					Destroy(currentConnection.gameObject);
+				{
+					var junctionHandle = circuit.AddJunction();
+					var junction = circuit.GetJunction(junctionHandle);
+
+					junction.transform.position = GetCircuitPosition(eventData);
+
+					junctionBehaviour = circuitManager.MapJunction(junctionHandle);
+
+					EndWire(eventData, junctionBehaviour);
+				}
 			}
 			else if (currentElement != null)
 				currentElement = null;
 		}
+
 		public void OnDrag(PointerEventData eventData)
 		{
-			if (currentConnection != null)
-				UpdateConnection(eventData);
+			if (currentWire != null)
+				UpdateWire(eventData);
 			else if (currentElement != null)
 				UpdateElement(eventData);
 		}

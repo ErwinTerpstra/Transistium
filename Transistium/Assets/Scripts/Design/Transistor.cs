@@ -6,20 +6,20 @@ namespace Transistium.Design
 {
 	public class Transistor : CircuitElement
 	{
-		public Junction gate;
+		public Handle gate;
 
-		public Junction drain;
+		public Handle drain;
 
-		public Junction source;
+		public Handle source;
 
 		public Transistor()
 		{
-			gate = new Junction();
-			drain = new Junction();
-			source = new Junction();
+			gate = Handle.Invalid;
+			drain = Handle.Invalid;
+			source = Handle.Invalid;
 		}
 
-		public void CollectJunctions(List<Junction> junctions)
+		public void CollectJunctions(List<Handle> junctions)
 		{
 			junctions.Add(gate);
 			junctions.Add(drain);
