@@ -2,13 +2,25 @@
 
 namespace Transistium.Design
 {
+	public delegate void CircuitHandleEvent(Handle handle);
+
 	public class Circuit
 	{
-		private List<Transistor> transistors;
+		public event CircuitHandleEvent TransistorAdded;
+		public event CircuitHandleEvent TransistorRemoved;
 
-		private List<Junction> junctions;
+		public event CircuitHandleEvent JunctionAdded;
+		public event CircuitHandleEvent JunctionRemoved;
 
-		private List<Wire> wires;
+		public event CircuitHandleEvent WireAdded;
+		public event CircuitHandleEvent WireRemoved;
+
+
+		private HandleList<Transistor> transistors;
+
+		private HandleList<Junction> junctions;
+
+		private HandleList<Wire> wires;
 
 		private Handle vcc;
 
@@ -16,131 +28,123 @@ namespace Transistium.Design
 		
 		public Circuit()
 		{
-			transistors = new List<Transistor>();
-			junctions = new List<Junction>();
-			wires = new List<Wire>();
+			transistors = new HandleList<Transistor>();
+			junctions = new HandleList<Junction>();
+			wires = new HandleList<Wire>();
 
-			vcc = AddJunction();
-			ground = AddJunction();
+			vcc = AddJunction(false);
+			ground = AddJunction(false);
 		}
 
 		public Handle AddTransistor()
 		{
 			var transistor = new Transistor();
 
-			transistor.gate = AddJunction();
-			transistor.drain = AddJunction();
-			transistor.source = AddJunction();
+			transistor.gate = AddJunction(true);
+			transistor.drain = AddJunction(true);
+			transistor.source = AddJunction(true);
 
-			transistors.Add(transistor);
+			var handle = transistors.Add(transistor);
 
-			return new Handle(transistors.Count - 1);
+			TransistorAdded?.Invoke(handle);
+
+			return handle;
 		}
 
-		public Handle AddJunction()
+		public Handle AddJunction(bool embedded)
 		{
-			junctions.Add(new Junction());
+			var handle = junctions.Add(new Junction()
+			{
+				embedded = embedded
+			});
 
-			return new Handle(junctions.Count - 1);
+			JunctionAdded?.Invoke(handle);
+
+			return handle;
 		}
 
 		public Handle AddWire(Handle junctionHandle)
 		{
 			var wire = new Wire();
 			wire.a = junctionHandle;
-
-			wires.Add(wire);
-
-			var wireHandle = new Handle(wires.Count - 1);
+			
+			var wireHandle = wires.Add(wire);
 
 			var junction = GetJunction(junctionHandle);
 			junction.wires.Add(wireHandle);
+
+			WireAdded?.Invoke(wireHandle);
 
 			return wireHandle;
 		}
 
 		public Transistor GetTransistor(Handle handle)
 		{
-			return transistors[handle.index];
+			return transistors[handle];
 		}
 
 		public Junction GetJunction(Handle handle)
 		{
-			return junctions[handle.index];
+			return junctions[handle];
 		}
 
 		public Wire GetWire(Handle handle)
 		{
-			return wires[handle.index];
+			return wires[handle];
 		}
 
-		public void RemoveTransistor(Handle transistorHandle)
+		public void RemoveTransistor(Handle handle)
 		{
-			var transistor = GetTransistor(transistorHandle);
+			var transistor = GetTransistor(handle);
 
 			RemoveJunction(transistor.gate);
 			RemoveJunction(transistor.drain);
 			RemoveJunction(transistor.source);
 
-			transistors.RemoveAt(transistorHandle.index);
+			transistors.Remove(handle);
+
+			TransistorRemoved?.Invoke(handle);
 		}
 
-		public void RemoveJunction(Handle junctionHandle)
+		public void RemoveJunction(Handle handle)
 		{
-			var junction = GetJunction(junctionHandle);
+			var junction = GetJunction(handle);
 
-			foreach (var wireHandle in junction.wires)
-				RemoveWire(wireHandle);
+			for (int i = junction.wires.Count - 1; i >= 0; --i)
+				RemoveWire(junction.wires[i]);
 
-			junctions.RemoveAt(junctionHandle.index);
+			junctions.Remove(handle);
+
+			JunctionRemoved?.Invoke(handle);
 		}
 
-		public void RemoveWire(Handle wireHandle)
+		public void RemoveWire(Handle handle)
 		{
-			var wire = GetWire(wireHandle);
+			var wire = GetWire(handle);
 
 			if (wire.a != Handle.Invalid)
 			{
 				var junction = GetJunction(wire.a);
-				junction.wires.Remove(wireHandle);
+				junction.wires.Remove(handle);
 
-				if (junction.wires.Count == 0)
+				if (!junction.embedded && junction.wires.Count == 0)
 					RemoveJunction(wire.a);
 			}
 
 			if (wire.b != Handle.Invalid)
 			{
 				var junction = GetJunction(wire.b);
-				junction.wires.Remove(wireHandle);
+				junction.wires.Remove(handle);
 
-				if (junction.wires.Count == 0)
+				if (!junction.embedded && junction.wires.Count == 0)
 					RemoveJunction(wire.b);
 			}
 
-			wires.RemoveAt(wireHandle.index);
+			wires.Remove(handle);
+
+			WireRemoved?.Invoke(handle);
 		}
-
-
-		public void Connect(Handle junctionA, Handle junctionB)
-		{
-			if (AreConnected(junctionA, junctionB))
-				return;
-
-			wires.Add(new Wire()
-			{
-				a = junctionA,
-				b = junctionB,
-			});
-
-			Handle handle = new Handle(wires.Count - 1);
-
-			Junction ja = GetJunction(junctionA);
-			Junction jb = GetJunction(junctionB);
-
-			ja.wires.Add(handle);
-			jb.wires.Add(handle);
-		}
-
+		
 		public bool AreConnected(Handle junctionA, Handle junctionB)
 		{
 			Junction ja = GetJunction(junctionA);
@@ -185,9 +189,9 @@ namespace Transistium.Design
 			}
 		}
 
-		public List<Transistor> Transistors => transistors;
-		public List<Junction> Junctions => junctions;
-		public List<Wire> Wires => wires;
+		public HandleList<Transistor> Transistors => transistors;
+		public HandleList<Junction> Junctions => junctions;
+		public HandleList<Wire> Wires => wires;
 
 		public Handle Vcc => vcc;
 		public Handle Ground => ground;

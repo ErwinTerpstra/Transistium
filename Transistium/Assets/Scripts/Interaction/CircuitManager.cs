@@ -43,12 +43,20 @@ namespace Transistium.Interaction
 			base.Awake();
 
 			circuit = new Circuit();
+			circuit.TransistorAdded += OnTransistorAdded;
+			circuit.TransistorRemoved += OnTransistorRemoved;
+
+			circuit.WireAdded += OnWireAdded;
+			circuit.WireRemoved += OnWireRemoved;
+
+			circuit.JunctionAdded += OnJunctionAdded;
+			circuit.JunctionRemoved += OnJunctionRemoved;
 
 			transistorMapping = new OneToOneMapping<Handle, TransistorBehaviour>();
 			junctionMapping = new OneToOneMapping<Handle, JunctionBehaviour>();
 			wireMapping = new OneToOneMapping<Handle, WireBehaviour>();
 		}
-
+			   
 		public Vector2 GetCircuitPosition(Vector3 worldPosition)
 		{
 			return transform.InverseTransformPoint(worldPosition);
@@ -68,69 +76,77 @@ namespace Transistium.Interaction
 			return behaviour.transform.position;
 		}
 		
-
-		public void RemoveWire(Handle wireHandle)
-		{
-			circuit.RemoveWire(wireHandle);
-
-			WireBehaviour behaviour;
-			if (wireMapping.TryGetValue(wireHandle, out behaviour))
-			{
-				Destroy(behaviour.gameObject);
-				wireMapping.Remove(wireHandle);
-			}
-		}
-
-		public TransistorBehaviour MapTransistor(Handle transistorHandle)
+		private void OnTransistorAdded(Handle handle)
 		{
 			TransistorBehaviour transistorBehaviour = Instantiate(prefabs.transistor, elementRoot, false);
-			transistorBehaviour.TransistorHandle = transistorHandle;
+			transistorBehaviour.TransistorHandle = handle;
 
-			Transistor transistor = circuit.GetTransistor(transistorHandle);
+			Transistor transistor = circuit.GetTransistor(handle);
 			transistorBehaviour.Gate.JunctionHandle = transistor.gate;
 			transistorBehaviour.Drain.JunctionHandle = transistor.drain;
 			transistorBehaviour.Source.JunctionHandle = transistor.source;
 
-			transistorMapping.Map(transistorHandle, transistorBehaviour);
+			transistorMapping.Map(handle, transistorBehaviour);
+
+			junctionMapping.Map(transistor.gate, transistorBehaviour.Gate);
+			junctionMapping.Map(transistor.drain, transistorBehaviour.Drain);
+			junctionMapping.Map(transistor.source, transistorBehaviour.Source);
 
 			CircuitElementBehaviour elementBehaviour = transistorBehaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = transistor;
-
-			MapJunction(transistorBehaviour.Gate, transistor.gate);
-			MapJunction(transistorBehaviour.Drain, transistor.drain);
-			MapJunction(transistorBehaviour.Source, transistor.source);
-
-			return transistorBehaviour;
 		}
 
-		public JunctionBehaviour MapJunction(Handle junctionHandle)
+		private void OnTransistorRemoved(Handle handle)
 		{
+			var transistor = circuit.GetTransistor(handle);
+
+			if (transistorMapping.TryGetValue(handle, out TransistorBehaviour behaviour))
+			{
+				Destroy(behaviour.gameObject);
+				transistorMapping.Remove(handle);
+			}
+		}
+
+		private void OnJunctionAdded(Handle handle)
+		{
+			var junction = circuit.GetJunction(handle);
+
+			if (junction.embedded)
+				return;
+
 			JunctionBehaviour junctionBehaviour = Instantiate(prefabs.junction, elementRoot, false);
+			junctionBehaviour.JunctionHandle = handle;
 
-			MapJunction(junctionBehaviour, junctionHandle);
-
-			return junctionBehaviour;
-		}
-		
-		public void MapJunction(JunctionBehaviour junctionBehaviour, Handle junctionHandle)
-		{
-			junctionBehaviour.JunctionHandle = junctionHandle;
-
-			junctionMapping.Map(junctionHandle, junctionBehaviour);
+			junctionMapping.Map(handle, junctionBehaviour);
 
 			CircuitElementBehaviour elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
-			elementBehaviour.Element = circuit.GetJunction(junctionHandle);
+			elementBehaviour.Element = junction;
 		}
 
+		private void OnJunctionRemoved(Handle handle)
+		{
+			if (junctionMapping.TryGetValue(handle, out JunctionBehaviour behaviour))
+			{
+				Destroy(behaviour.gameObject);
+				junctionMapping.Remove(handle);
+			}
+		}
 
-		public WireBehaviour MapWire(Handle wireHandle)
+		private void OnWireAdded(Handle handle)
 		{
 			WireBehaviour wireBehaviour = Instantiate(prefabs.wire, wireRoot, false);
-			wireBehaviour.WireHandle = wireHandle;
+			wireBehaviour.WireHandle = handle;
 
-			wireMapping.Map(wireBehaviour.WireHandle, wireBehaviour);
+			wireMapping.Map(handle, wireBehaviour);
+		}
 
-			return wireBehaviour;
+		private void OnWireRemoved(Handle handle)
+		{
+			if (wireMapping.TryGetValue(handle, out WireBehaviour behaviour))
+			{
+				Destroy(behaviour.gameObject);
+				wireMapping.Remove(handle);
+			}
 		}
 
 		public Circuit Circuit

@@ -4,6 +4,8 @@ namespace Transistium.Design
 {
 	public class Junction : CircuitElement
 	{
+		public bool embedded;
+
 		public List<Handle> wires;
 
 		public Junction()

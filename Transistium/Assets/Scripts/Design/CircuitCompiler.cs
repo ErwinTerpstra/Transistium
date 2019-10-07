@@ -25,8 +25,11 @@ namespace Transistium.Design
 			allJunctions.Add(circuit.Vcc);
 			allJunctions.Add(circuit.Ground);
 
-			foreach (var transistor in circuit.Transistors)
+			foreach (var transistorHandle in circuit.Transistors)
+			{
+				var transistor = circuit.GetTransistor(transistorHandle);
 				transistor.CollectJunctions(allJunctions);
+			}
 
 			// Map all connected junctions to a single wire
 			List<Handle> connectedJunctions = new List<Handle>();
@@ -46,8 +49,10 @@ namespace Transistium.Design
 			}
 
 			// Create transistors
-			foreach (var transistor in circuit.Transistors)
+			foreach (var transistorHandle in circuit.Transistors)
 			{
+				var transistor = circuit.GetTransistor(transistorHandle);
+
 				compiledCircuit.transistors.Add(new Runtime.Transistor()
 				{
 					gate	= junctionMapping[transistor.gate],
