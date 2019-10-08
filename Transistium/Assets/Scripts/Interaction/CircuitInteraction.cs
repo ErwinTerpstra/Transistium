@@ -20,11 +20,16 @@ namespace Transistium.Interaction
 
 		private CircuitElementBehaviour selectedElement;
 
+		private CircuitElementBehaviour draggingElement;
+
 		private Handle currentWire;
 
 		private void Start()
 		{
 			circuitManager = CircuitManager.Instance;
+			circuitManager.CircuitEntered += OnCircuitEntered;
+			circuitManager.CircuitLeft += OnCircuitLeft;
+
 			circuit = circuitManager.Circuit;
 
 			currentWire = Handle.Invalid;
@@ -39,7 +44,7 @@ namespace Transistium.Interaction
 				selectionIndicator.position = circuitManager.GetWorldPosition(selectedElement.Element.transform.position);
 				selectionIndicator.gameObject.SetActive(true);
 
-				HandleKeyboardShortcut();
+				HandleSelectedElementShortcuts();
 			}
 			else
 				selectionIndicator.gameObject.SetActive(false);
@@ -54,7 +59,7 @@ namespace Transistium.Interaction
 		}
 
 
-		private void HandleKeyboardShortcut()
+		private void HandleSelectedElementShortcuts()
 		{
 			if (Input.GetKey(KeyCode.Delete))
 			{
@@ -116,7 +121,7 @@ namespace Transistium.Interaction
 
 		private void UpdateElement(PointerEventData eventData)
 		{
-			selectedElement.Element.transform.position = GetCircuitPosition(eventData);
+			draggingElement.Element.transform.position = GetCircuitPosition(eventData);
 		}
 
 		private void HandleLeftClick(PointerEventData eventData)
@@ -129,10 +134,23 @@ namespace Transistium.Interaction
 				return;
 			}
 
-			var circuitElement = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
+			var elementBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
+			var junctionBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
 
-			if (circuitElement != null)
-				selectedElement = circuitElement;
+			if (junctionBehaviour != null)
+			{
+				var junction = circuit.GetJunction(junctionBehaviour.JunctionHandle);
+				if (junction.embedded)
+					elementBehaviour = junctionBehaviour.transform.parent.GetComponentInParent<CircuitElementBehaviour>();
+			}
+
+			if (elementBehaviour != null)
+			{
+				selectedElement = elementBehaviour;
+				return;
+			}
+
+			selectedElement = null;
 		}
 
 		private void HandleRightClick(PointerEventData eventData)
@@ -177,6 +195,13 @@ namespace Transistium.Interaction
 							break;
 						}
 					}
+					else
+					{
+						var elementBehaviour = eventData.pointerPressRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
+
+						if (elementBehaviour == selectedElement)
+							draggingElement = selectedElement;
+					}
 
 					break;
 			}
@@ -209,6 +234,12 @@ namespace Transistium.Interaction
 
 				return;
 			}
+
+			if (draggingElement != null)
+			{
+				draggingElement = null;
+				return;
+			}
 		}
 
 		public void OnDrag(PointerEventData eventData)
@@ -219,12 +250,23 @@ namespace Transistium.Interaction
 				return;
 			}
 
-			if (selectedElement != null)
+			if (draggingElement != null)
 			{
 				UpdateElement(eventData);
 				return;
 			}
 		}
+
+		private void OnCircuitLeft(Circuit circuit)
+		{
+
+		}
+
+		private void OnCircuitEntered(Circuit circuit)
+		{
+			this.circuit = circuit;
+		}
+
 	}
 
 }

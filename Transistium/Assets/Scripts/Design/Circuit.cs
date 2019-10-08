@@ -3,7 +3,7 @@
 namespace Transistium.Design
 {
 	public delegate void CircuitHandleEvent(Handle handle);
-
+	
 	public class Circuit
 	{
 		public event CircuitHandleEvent TransistorAdded;
@@ -15,12 +15,13 @@ namespace Transistium.Design
 		public event CircuitHandleEvent WireAdded;
 		public event CircuitHandleEvent WireRemoved;
 
-
 		private HandleList<Transistor> transistors;
 
 		private HandleList<Junction> junctions;
 
 		private HandleList<Wire> wires;
+
+		private List<ChipInstance> chipInstances;
 
 		private Handle vcc;
 
@@ -31,6 +32,8 @@ namespace Transistium.Design
 			transistors = new HandleList<Transistor>();
 			junctions = new HandleList<Junction>();
 			wires = new HandleList<Wire>();
+
+			chipInstances = new List<ChipInstance>();
 
 			vcc = AddJunction(false);
 			ground = AddJunction(false);

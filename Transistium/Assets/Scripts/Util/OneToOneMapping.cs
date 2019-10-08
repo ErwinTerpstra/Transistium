@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Transistium.Util
 {
-	public class OneToOneMapping<A, B>
+	public class OneToOneMapping<A, B> : IEnumerable<KeyValuePair<A, B>>
 	{
 		private Dictionary<A, B> forward;
 
@@ -62,6 +63,22 @@ namespace Transistium.Util
 		public bool TryGetValue(B key, out A value)
 		{
 			return backward.TryGetValue(key, out value);
+		}
+
+		public void Clear()
+		{
+			forward.Clear();
+			backward.Clear();
+		}
+
+		public IEnumerator<KeyValuePair<A, B>> GetEnumerator()
+		{
+			return ((IEnumerable<KeyValuePair<A, B>>)forward).GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<KeyValuePair<A, B>>)forward).GetEnumerator();
 		}
 	}
 

@@ -19,8 +19,13 @@ namespace Transistium.Interaction
 		public WireBehaviour wire;
 	}
 
+	public delegate void CircuitEvent(Circuit circuit);
+
 	public class CircuitManager : MonoSingleton<CircuitManager>
 	{
+		public event CircuitEvent CircuitLeft;
+		public event CircuitEvent CircuitEntered;
+
 		[SerializeField]
 		private CircuitPrefabs prefabs = null;
 
@@ -29,6 +34,8 @@ namespace Transistium.Interaction
 
 		[SerializeField]
 		private Transform wireRoot = null;
+
+		private Project project;
 
 		private Circuit circuit;
 		
@@ -41,8 +48,54 @@ namespace Transistium.Interaction
 		protected override void Awake()
 		{
 			base.Awake();
+			
+			transistorMapping = new OneToOneMapping<Handle, TransistorBehaviour>();
+			junctionMapping = new OneToOneMapping<Handle, JunctionBehaviour>();
+			wireMapping = new OneToOneMapping<Handle, WireBehaviour>();
 
-			circuit = new Circuit();
+			project = new Project();
+			SwitchCircuit(project.rootCircuit);
+		}
+
+		private void SwitchCircuit(Circuit circuit)
+		{
+			if (this.circuit != null)
+				LeaveCircuit();
+
+			this.circuit = circuit;
+
+			EnterCircuit();
+		}
+
+		private void LeaveCircuit()
+		{
+			circuit.TransistorAdded -= OnTransistorAdded;
+			circuit.TransistorRemoved -= OnTransistorRemoved;
+
+			circuit.WireAdded -= OnWireAdded;
+			circuit.WireRemoved -= OnWireRemoved;
+
+			circuit.JunctionAdded -= OnJunctionAdded;
+			circuit.JunctionRemoved -= OnJunctionRemoved;
+
+			foreach (var pair in transistorMapping)
+				Destroy(pair.Value);
+
+			foreach (var pair in junctionMapping)
+				Destroy(pair.Value);
+
+			foreach (var pair in wireMapping)
+				Destroy(pair.Value);
+
+			transistorMapping.Clear();
+			junctionMapping.Clear();
+			wireMapping.Clear();
+
+			CircuitLeft?.Invoke(circuit);
+		}
+
+		private void EnterCircuit()
+		{
 			circuit.TransistorAdded += OnTransistorAdded;
 			circuit.TransistorRemoved += OnTransistorRemoved;
 
@@ -52,11 +105,18 @@ namespace Transistium.Interaction
 			circuit.JunctionAdded += OnJunctionAdded;
 			circuit.JunctionRemoved += OnJunctionRemoved;
 
-			transistorMapping = new OneToOneMapping<Handle, TransistorBehaviour>();
-			junctionMapping = new OneToOneMapping<Handle, JunctionBehaviour>();
-			wireMapping = new OneToOneMapping<Handle, WireBehaviour>();
+			foreach (var handle in circuit.Transistors)
+				OnTransistorAdded(handle);
+
+			foreach (var handle in circuit.Junctions)
+				OnJunctionAdded(handle);
+
+			foreach (var handle in circuit.Wires)
+				OnWireAdded(handle);
+
+			CircuitEntered?.Invoke(circuit);
 		}
-			   
+
 		public Vector2 GetCircuitPosition(Vector3 worldPosition)
 		{
 			return transform.InverseTransformPoint(worldPosition);
