@@ -8,11 +8,11 @@ namespace Transistium.Design
 	{
 		private Runtime.Circuit compiledCircuit;
 
-		private OneToManyMapping<int, Handle> junctionMapping;
+		private OneToManyMapping<int, Junction> junctionMapping;
 
 		public CircuitCompiler()
 		{
-			junctionMapping = new OneToManyMapping<int, Handle>();
+			junctionMapping = new OneToManyMapping<int, Junction>();
 		}
 
 		public void Compile(Circuit circuit)
@@ -20,44 +20,38 @@ namespace Transistium.Design
 			compiledCircuit = new Runtime.Circuit();
 
 			// Collect all junctions in the circuit
-			List<Handle> allJunctions = new List<Handle>();
-
-			allJunctions.Add(circuit.Vcc);
-			allJunctions.Add(circuit.Ground);
-
-			foreach (var transistorHandle in circuit.Transistors)
-			{
-				var transistor = circuit.GetTransistor(transistorHandle);
+			List<Handle<Junction>> allJunctions = new List<Handle<Junction>>();
+			
+			foreach (var transistor in circuit.transistors)
 				transistor.CollectJunctions(allJunctions);
-			}
 
 			// Map all connected junctions to a single wire
-			List<Handle> connectedJunctions = new List<Handle>();
+			List<Junction> connectedJunctions = new List<Junction>();
 			foreach (var junctionHandle in allJunctions)
 			{
-				if (junctionMapping.Contains(junctionHandle))
+				var junction = circuit.junctions[junctionHandle];
+
+				if (junctionMapping.Contains(junction))
 					continue;
 
 				int wire = compiledCircuit.AddWire();
 
 				// Collect connected junctions to this one
 				connectedJunctions.Clear();
-				circuit.CollectConnectedJunctions(junctionHandle, connectedJunctions);
+				circuit.CollectConnectedJunctions(junction, connectedJunctions);
 
 				// Store the created wire mapping for all connected junctions
 				junctionMapping.Map(wire, connectedJunctions);
 			}
 
 			// Create transistors
-			foreach (var transistorHandle in circuit.Transistors)
+			foreach (var transistor in circuit.transistors)
 			{
-				var transistor = circuit.GetTransistor(transistorHandle);
-
 				compiledCircuit.transistors.Add(new Runtime.Transistor()
 				{
-					gate	= junctionMapping[transistor.gate],
-					drain	= junctionMapping[transistor.drain],
-					source	= junctionMapping[transistor.source],
+					gate	= junctionMapping[circuit.junctions[transistor.gate]],
+					drain	= junctionMapping[circuit.junctions[transistor.drain]],
+					source	= junctionMapping[circuit.junctions[transistor.source]],
 				});
 			}
 		}

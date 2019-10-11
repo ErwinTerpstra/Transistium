@@ -4,6 +4,13 @@ using System.Collections.Generic;
 
 namespace Transistium.Util
 {
+	public enum ComparisonResult
+	{
+		ADDED,
+		REMOVED,
+		UNCHANGED
+	}
+
 	public class OneToOneMapping<A, B> : IEnumerable<KeyValuePair<A, B>>
 	{
 		private Dictionary<A, B> forward;
@@ -69,6 +76,23 @@ namespace Transistium.Util
 		{
 			forward.Clear();
 			backward.Clear();
+		}
+
+		public IEnumerable<Pair<A, ComparisonResult>> CompareTo(ICollection<A> source)
+		{
+			foreach (var a in source)
+			{
+				if (Contains(a))
+					yield return new Pair<A, ComparisonResult>(a, ComparisonResult.UNCHANGED);
+				else
+					yield return new Pair<A, ComparisonResult>(a, ComparisonResult.ADDED);
+			}
+
+			foreach (var a in forward.Keys)
+			{
+				if (!source.Contains(a))
+					yield return new Pair<A, ComparisonResult>(a, ComparisonResult.REMOVED);
+			}
 		}
 
 		public IEnumerator<KeyValuePair<A, B>> GetEnumerator()

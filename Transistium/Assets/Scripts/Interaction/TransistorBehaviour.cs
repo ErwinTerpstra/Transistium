@@ -15,7 +15,7 @@ namespace Transistium.Interaction
 		[SerializeField]
 		private JunctionBehaviour source = null;
 
-		private Handle transitorHandle;
+		private Transistor transistor;
 
 		private void LateUpdate()
 		{
@@ -26,14 +26,13 @@ namespace Transistium.Interaction
 
 		private void UpdateJunction(JunctionBehaviour junctionBehaviour)
 		{
-			var junction = CircuitManager.Instance.Circuit.GetJunction(junctionBehaviour.JunctionHandle);
-			junction.transform.position = CircuitManager.Instance.GetCircuitPosition(junctionBehaviour.transform.position);
+			junctionBehaviour.Junction.transform.position = CircuitManager.Instance.GetCircuitPosition(junctionBehaviour.transform.position);
 		}
 
-		public Handle TransistorHandle
+		public Transistor Transistor
 		{
-			get { return transitorHandle; }
-			set { transitorHandle = value; }
+			get { return transistor; }
+			set { transistor = value; }
 		}
 
 		public JunctionBehaviour Gate => gate;

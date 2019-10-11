@@ -8,7 +8,7 @@ namespace Transistium.Interaction
 {
 	public class WireBehaviour : MonoBehaviour
 	{
-		private Handle wireHandle;
+		private Wire wire;
 
 		private LineRenderer lineRenderer;
 
@@ -38,15 +38,13 @@ namespace Transistium.Interaction
 		{
 			vertexBuffer.Clear();
 
-			var wire = CircuitManager.Instance.Circuit.GetWire(wireHandle);
-
-			if (wire.a != Handle.Invalid)
+			if (wire.a != Handle<Junction>.Invalid)
 				vertexBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.a));
 
 			foreach (var vertex in wire.vertices)
 				vertexBuffer.Add(CircuitManager.Instance.GetWorldPosition(vertex));
 
-			if (wire.b != Handle.Invalid)
+			if (wire.b != Handle<Junction>.Invalid)
 				vertexBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.b));
 		}
 
@@ -115,10 +113,10 @@ namespace Transistium.Interaction
 		}
 
 
-		public Handle WireHandle
+		public Wire Wire
 		{
-			get => wireHandle;
-			set => wireHandle = value;
+			get => wire;
+			set => wire = value;
 		}
 	}
 

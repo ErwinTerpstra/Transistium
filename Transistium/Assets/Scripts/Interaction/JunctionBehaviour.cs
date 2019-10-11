@@ -7,12 +7,12 @@ namespace Transistium.Interaction
 {
 	public class JunctionBehaviour : MonoBehaviour
 	{
-		private Handle junctionHandle;
+		private Junction junction;
 
-		public Handle JunctionHandle
+		public Junction Junction
 		{
-			get => junctionHandle;
-			set => junctionHandle = value;
+			get => junction;
+			set => junction = value;
 		}
 	}
 }

@@ -22,17 +22,17 @@ namespace Transistium.Interaction
 
 		private CircuitElementBehaviour draggingElement;
 
-		private Handle currentWire;
+		private Wire currentWire;
 
 		private void Start()
 		{
 			circuitManager = CircuitManager.Instance;
-			circuitManager.CircuitEntered += OnCircuitEntered;
-			circuitManager.CircuitLeft += OnCircuitLeft;
+			circuitManager.ChipEnterred += OnChipEnterred;
+			circuitManager.ChipLeft += OnChipLeft;
 
-			circuit = circuitManager.Circuit;
+			circuit = circuitManager.Chip.circuit;
 
-			currentWire = Handle.Invalid;
+			currentWire = null;
 
 			selectionIndicator.gameObject.SetActive(false);
 		}
@@ -41,6 +41,7 @@ namespace Transistium.Interaction
 		{
 			if (selectedElement != null)
 			{
+				// Update the position of the selection indicator
 				selectionIndicator.position = circuitManager.GetWorldPosition(selectedElement.Element.transform.position);
 				selectionIndicator.gameObject.SetActive(true);
 
@@ -51,8 +52,7 @@ namespace Transistium.Interaction
 
 			if (Input.GetKeyDown(KeyCode.T))
 			{
-				var transistorHandle = circuit.AddTransistor();
-				var transistor = circuit.GetTransistor(transistorHandle);
+				var transistor = circuit.AddTransistor(out _);
 
 				transistor.transform.position = Vector2.zero;// GetCircuitPosition(eventData);
 			}
@@ -63,16 +63,21 @@ namespace Transistium.Interaction
 		{
 			if (Input.GetKey(KeyCode.Delete))
 			{
-				var transistorBehaviour = selectedElement.GetComponent<TransistorBehaviour>();
-				var junctionBehaviour = selectedElement.GetComponent<JunctionBehaviour>();
+				if (!selectedElement.Element.flags.Has(CircuitElementFlags.PERMANENT))
+				{
+					// Deduce what kind of element was selected
+					var transistorBehaviour = selectedElement.GetComponent<TransistorBehaviour>();
+					var junctionBehaviour = selectedElement.GetComponent<JunctionBehaviour>();
 
-				if (transistorBehaviour != null)
-					circuit.RemoveTransistor(transistorBehaviour.TransistorHandle);
-				else if (junctionBehaviour != null)
-					circuit.RemoveJunction(junctionBehaviour.JunctionHandle);
+					// Remove from circuit accordingly
+					if (transistorBehaviour != null)
+						circuit.RemoveTransistor(transistorBehaviour.Transistor);
+					else if (junctionBehaviour != null)
+						circuit.RemoveJunction(junctionBehaviour.Junction);
 
-				selectedElement = null;
-				return;
+					selectedElement = null;
+					return;
+				}
 			}
 
 			if (Input.GetKey(KeyCode.Escape))
@@ -95,28 +100,23 @@ namespace Transistium.Interaction
 
 		private void StartWire(PointerEventData eventData, JunctionBehaviour junctionBehaviour)
 		{
-			currentWire = circuit.AddWire(junctionBehaviour.JunctionHandle);
-
-			var wire = circuit.GetWire(currentWire);
-			wire.vertices.Add(GetCircuitPosition(eventData));
+			currentWire = circuit.AddWire(junctionBehaviour.Junction, out _);
+			currentWire.vertices.Add(GetCircuitPosition(eventData));
 		}
 
-		private void ConnectWire(PointerEventData eventData, Handle junctionHandle)
+		private void ConnectWire(PointerEventData eventData, Junction junction)
 		{
-			var wire = circuit.GetWire(currentWire);
-			wire.b = junctionHandle;
-			wire.vertices.Clear();
+			currentWire.b = circuit.junctions.LookupHandle(junction);
+			currentWire.vertices.Clear();
 
-			var junction = circuit.GetJunction(junctionHandle);
-			junction.wires.Add(currentWire);
+			junction.wires.Add(circuit.wires.LookupHandle(currentWire));
 
-			currentWire = Handle.Invalid;
+			currentWire = null;
 		}
 
 		private void UpdateWire(PointerEventData eventData)
 		{
-			var wire = circuit.GetWire(currentWire);
-			wire.vertices[0] = GetCircuitPosition(eventData);
+			currentWire.vertices[0] = GetCircuitPosition(eventData);
 		}
 
 		private void UpdateElement(PointerEventData eventData)
@@ -130,22 +130,22 @@ namespace Transistium.Interaction
 
 			if (wireBehaviour != null)
 			{
-				circuit.RemoveWire(wireBehaviour.WireHandle);
+				circuit.RemoveWire(wireBehaviour.Wire);
 				return;
 			}
 
 			var elementBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
-			var junctionBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
-
-			if (junctionBehaviour != null)
-			{
-				var junction = circuit.GetJunction(junctionBehaviour.JunctionHandle);
-				if (junction.embedded)
-					elementBehaviour = junctionBehaviour.transform.parent.GetComponentInParent<CircuitElementBehaviour>();
-			}
 
 			if (elementBehaviour != null)
 			{
+				var junctionBehaviour = elementBehaviour.GetComponent<JunctionBehaviour>();
+
+				if (junctionBehaviour != null)
+				{
+					if (junctionBehaviour.Junction.flags.Has(CircuitElementFlags.EMBEDDED))
+						elementBehaviour = junctionBehaviour.transform.parent.GetComponentInParent<CircuitElementBehaviour>();
+				}
+
 				selectedElement = elementBehaviour;
 				return;
 			}
@@ -210,26 +210,23 @@ namespace Transistium.Interaction
 
 		public void OnEndDrag(PointerEventData eventData)
 		{
-			if (currentWire != Handle.Invalid)
+			if (currentWire != null)
 			{
 				var junctionBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
-				var wire = circuit.GetWire(currentWire);
 
 				if (junctionBehaviour != null)
 				{
-					if (!circuit.AreConnected(wire.a, junctionBehaviour.JunctionHandle))
-						ConnectWire(eventData, junctionBehaviour.JunctionHandle);
+					if (!circuit.AreConnected(circuit.junctions[currentWire.a], junctionBehaviour.Junction))
+						ConnectWire(eventData, junctionBehaviour.Junction);
 					else
 						circuit.RemoveWire(currentWire);
 				}
 				else
 				{
-					var junctionHandle = circuit.AddJunction(false);
-					var junction = circuit.GetJunction(junctionHandle);
-
+					var junction = circuit.AddJunction(CircuitElementFlags.NONE, out _);
 					junction.transform.position = GetCircuitPosition(eventData);
 
-					ConnectWire(eventData, junctionHandle);
+					ConnectWire(eventData, junction);
 				}
 
 				return;
@@ -244,7 +241,7 @@ namespace Transistium.Interaction
 
 		public void OnDrag(PointerEventData eventData)
 		{
-			if (currentWire != Handle.Invalid)
+			if (currentWire != null)
 			{
 				UpdateWire(eventData);
 				return;
@@ -257,14 +254,14 @@ namespace Transistium.Interaction
 			}
 		}
 
-		private void OnCircuitLeft(Circuit circuit)
-		{
 
+		private void OnChipEnterred(Chip chip)
+		{
+			circuit = chip.circuit;
 		}
-
-		private void OnCircuitEntered(Circuit circuit)
+		private void OnChipLeft(Chip chip)
 		{
-			this.circuit = circuit;
+
 		}
 
 	}

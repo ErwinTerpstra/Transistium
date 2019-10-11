@@ -17,14 +17,16 @@ namespace Transistium.Interaction
 		public JunctionBehaviour junction;
 
 		public WireBehaviour wire;
+
+		public PinBehaviour pin;
 	}
 
-	public delegate void CircuitEvent(Circuit circuit);
+	public delegate void ChipEvent(Chip chip);
 
 	public class CircuitManager : MonoSingleton<CircuitManager>
 	{
-		public event CircuitEvent CircuitLeft;
-		public event CircuitEvent CircuitEntered;
+		public event ChipEvent ChipLeft;
+		public event ChipEvent ChipEnterred;
 
 		[SerializeField]
 		private CircuitPrefabs prefabs = null;
@@ -37,47 +39,67 @@ namespace Transistium.Interaction
 
 		private Project project;
 
-		private Circuit circuit;
+		private Chip chip;
 		
-		private OneToOneMapping<Handle, TransistorBehaviour> transistorMapping;
+		private OneToOneMapping<Transistor, TransistorBehaviour> transistorMapping;
 
-		private OneToOneMapping<Handle, JunctionBehaviour> junctionMapping;
+		private OneToOneMapping<Junction, JunctionBehaviour> junctionMapping;
 
-		private OneToOneMapping<Handle, WireBehaviour> wireMapping;
+		private OneToOneMapping<Wire, WireBehaviour> wireMapping;
+
+		private OneToOneMapping<Pin, PinBehaviour> pinMapping;
 
 		protected override void Awake()
 		{
 			base.Awake();
 			
-			transistorMapping = new OneToOneMapping<Handle, TransistorBehaviour>();
-			junctionMapping = new OneToOneMapping<Handle, JunctionBehaviour>();
-			wireMapping = new OneToOneMapping<Handle, WireBehaviour>();
+			transistorMapping		= new OneToOneMapping<Transistor, TransistorBehaviour>();
+			junctionMapping			= new OneToOneMapping<Junction, JunctionBehaviour>();
+			wireMapping				= new OneToOneMapping<Wire, WireBehaviour>();
+			pinMapping				= new OneToOneMapping<Pin, PinBehaviour>();
 
 			project = new Project();
-			SwitchCircuit(project.rootCircuit);
+			SwitchChip(project.chips[project.rootChipHandle]);
 		}
 
-		private void SwitchCircuit(Circuit circuit)
+		private void Update()
 		{
-			if (this.circuit != null)
-				LeaveCircuit();
-
-			this.circuit = circuit;
-
-			EnterCircuit();
+			DetectChanges(transistorMapping,	chip.circuit.transistors,	OnTransistorAdded,	OnTransistorRemoved);
+			DetectChanges(junctionMapping,		chip.circuit.junctions,		OnJunctionAdded,	OnJunctionRemoved);
+			DetectChanges(wireMapping,			chip.circuit.wires,			OnWireAdded,		OnWireRemoved);
+			DetectChanges(pinMapping,			chip.pins,					OnPinAdded,			OnPinRemoved);
 		}
 
-		private void LeaveCircuit()
+		private void DetectChanges<A, B>(OneToOneMapping<A, B> mapping, ICollection<A> source, Action<A> addedHandler, Action<A> removedHandler)
 		{
-			circuit.TransistorAdded -= OnTransistorAdded;
-			circuit.TransistorRemoved -= OnTransistorRemoved;
+			foreach (var comparisonEntr in mapping.CompareTo(source))
+			{
+				switch (comparisonEntr.second)
+				{
+					case ComparisonResult.ADDED:
+						addedHandler?.Invoke(comparisonEntr.first);
+						break;
 
-			circuit.WireAdded -= OnWireAdded;
-			circuit.WireRemoved -= OnWireRemoved;
+					case ComparisonResult.REMOVED:
+						removedHandler?.Invoke(comparisonEntr.first);
+						break;
+				}
+			}
+		}
 
-			circuit.JunctionAdded -= OnJunctionAdded;
-			circuit.JunctionRemoved -= OnJunctionRemoved;
+		public void SwitchChip(Chip chip)
+		{
+			if (this.chip != null)
+				LeaveChip();
 
+			this.chip = chip;
+
+			EnterChip();
+		}
+
+		private void LeaveChip()
+		{
+			// Destroy all elements
 			foreach (var pair in transistorMapping)
 				Destroy(pair.Value);
 
@@ -91,30 +113,22 @@ namespace Transistium.Interaction
 			junctionMapping.Clear();
 			wireMapping.Clear();
 
-			CircuitLeft?.Invoke(circuit);
+			ChipLeft?.Invoke(chip);
 		}
 
-		private void EnterCircuit()
+		private void EnterChip()
 		{
-			circuit.TransistorAdded += OnTransistorAdded;
-			circuit.TransistorRemoved += OnTransistorRemoved;
-
-			circuit.WireAdded += OnWireAdded;
-			circuit.WireRemoved += OnWireRemoved;
-
-			circuit.JunctionAdded += OnJunctionAdded;
-			circuit.JunctionRemoved += OnJunctionRemoved;
-
-			foreach (var handle in circuit.Transistors)
+			// Handle instantiating all elements
+			foreach (var handle in chip.circuit.transistors)
 				OnTransistorAdded(handle);
 
-			foreach (var handle in circuit.Junctions)
+			foreach (var handle in chip.circuit.junctions)
 				OnJunctionAdded(handle);
 
-			foreach (var handle in circuit.Wires)
+			foreach (var handle in chip.circuit.wires)
 				OnWireAdded(handle);
 
-			CircuitEntered?.Invoke(circuit);
+			ChipEnterred?.Invoke(chip);
 		}
 
 		public Vector2 GetCircuitPosition(Vector3 worldPosition)
@@ -127,91 +141,136 @@ namespace Transistium.Interaction
 			return transform.TransformPoint(circuitPosition);
 		}
 
-		public Vector3 GetJunctionPosition(Handle junctionHandle)
+		public Vector3 GetJunctionPosition(Handle<Junction> handle)
+		{
+			return GetJunctionPosition(chip.circuit.junctions[handle]);
+		}
+
+		public Vector3 GetJunctionPosition(Junction junction)
 		{
 			JunctionBehaviour behaviour;
-			if (!junctionMapping.TryGetValue(junctionHandle, out behaviour))
+			if (!junctionMapping.TryGetValue(junction, out behaviour))
 				return Vector3.zero;
 
 			return behaviour.transform.position;
 		}
-		
-		private void OnTransistorAdded(Handle handle)
+
+		private void SetupJunctionBehaviour(Handle<Junction> handle, JunctionBehaviour junctionBehaviour)
 		{
+			var junction = chip.circuit.junctions[handle];
+			junctionBehaviour.Junction = junction;
+
+			var elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
+			elementBehaviour.Element = junction;
+
+			junctionMapping.Map(junction, junctionBehaviour);
+		}
+		
+		private void OnTransistorAdded(Transistor transistor)
+		{
+			// Instantiate the behaviour
 			TransistorBehaviour transistorBehaviour = Instantiate(prefabs.transistor, elementRoot, false);
-			transistorBehaviour.TransistorHandle = handle;
+			transistorBehaviour.Transistor = transistor;
 
-			Transistor transistor = circuit.GetTransistor(handle);
-			transistorBehaviour.Gate.JunctionHandle = transistor.gate;
-			transistorBehaviour.Drain.JunctionHandle = transistor.drain;
-			transistorBehaviour.Source.JunctionHandle = transistor.source;
-
-			transistorMapping.Map(handle, transistorBehaviour);
-
-			junctionMapping.Map(transistor.gate, transistorBehaviour.Gate);
-			junctionMapping.Map(transistor.drain, transistorBehaviour.Drain);
-			junctionMapping.Map(transistor.source, transistorBehaviour.Source);
-
+			// Link the element behaviour
 			CircuitElementBehaviour elementBehaviour = transistorBehaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = transistor;
+
+			// Link junction behaviours with the correct junctions
+			SetupJunctionBehaviour(transistor.gate, transistorBehaviour.Gate);
+			SetupJunctionBehaviour(transistor.drain, transistorBehaviour.Drain);
+			SetupJunctionBehaviour(transistor.source, transistorBehaviour.Source);
+
+			// Store the behaviour in the mapping tables
+			transistorMapping.Map(transistor, transistorBehaviour);
 		}
 
-		private void OnTransistorRemoved(Handle handle)
+		private void OnTransistorRemoved(Transistor transistor)
 		{
-			var transistor = circuit.GetTransistor(handle);
-
-			if (transistorMapping.TryGetValue(handle, out TransistorBehaviour behaviour))
+			if (transistorMapping.TryGetValue(transistor, out TransistorBehaviour behaviour))
 			{
 				Destroy(behaviour.gameObject);
-				transistorMapping.Remove(handle);
+				transistorMapping.Remove(transistor);
 			}
 		}
 
-		private void OnJunctionAdded(Handle handle)
+		private void OnJunctionAdded(Junction junction)
 		{
-			var junction = circuit.GetJunction(handle);
-
-			if (junction.embedded)
+			// Embedded junctions will be instantiated as part of another element (i.e. transistor)
+			if (junction.flags.Has(CircuitElementFlags.EMBEDDED))
 				return;
 
+			// Instantiate a new standalone junction behaviour
 			JunctionBehaviour junctionBehaviour = Instantiate(prefabs.junction, elementRoot, false);
-			junctionBehaviour.JunctionHandle = handle;
+			junctionBehaviour.Junction = junction;
 
-			junctionMapping.Map(handle, junctionBehaviour);
-
+			// Link the element behaviour
 			CircuitElementBehaviour elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = junction;
+
+			// Store it in the mapping
+			junctionMapping.Map(junction, junctionBehaviour);
 		}
 
-		private void OnJunctionRemoved(Handle handle)
+		private void OnJunctionRemoved(Junction junction)
 		{
-			if (junctionMapping.TryGetValue(handle, out JunctionBehaviour behaviour))
+			if (junctionMapping.TryGetValue(junction, out JunctionBehaviour behaviour))
 			{
 				Destroy(behaviour.gameObject);
-				junctionMapping.Remove(handle);
+				junctionMapping.Remove(junction);
 			}
 		}
 
-		private void OnWireAdded(Handle handle)
+		private void OnWireAdded(Wire wire)
 		{
 			WireBehaviour wireBehaviour = Instantiate(prefabs.wire, wireRoot, false);
-			wireBehaviour.WireHandle = handle;
+			wireBehaviour.Wire = wire;
 
-			wireMapping.Map(handle, wireBehaviour);
+			wireMapping.Map(wire, wireBehaviour);
 		}
 
-		private void OnWireRemoved(Handle handle)
+		private void OnWireRemoved(Wire wire)
 		{
-			if (wireMapping.TryGetValue(handle, out WireBehaviour behaviour))
+			if (wireMapping.TryGetValue(wire, out WireBehaviour behaviour))
 			{
 				Destroy(behaviour.gameObject);
-				wireMapping.Remove(handle);
+				wireMapping.Remove(wire);
 			}
 		}
 
-		public Circuit Circuit
+		private void OnPinAdded(Pin pin)
 		{
-			get { return circuit; }
+			// Instantiate the pin behaviour
+			PinBehaviour pinBehaviour = Instantiate(prefabs.pin, elementRoot, false);
+			pinBehaviour.Pin = pin;
+
+			// Link the element behaviour
+			CircuitElementBehaviour elementBehaviour = pinBehaviour.GetComponent<CircuitElementBehaviour>();
+			elementBehaviour.Element = pin;
+
+			// Store it in the mapping
+			pinMapping.Map(pin, pinBehaviour);
+
+			SetupJunctionBehaviour(pin.junctionHandle, pinBehaviour.Junction);
+		}
+
+		private void OnPinRemoved(Pin pin)
+		{
+			if (pinMapping.TryGetValue(pin, out PinBehaviour behaviour))
+			{
+				Destroy(behaviour.gameObject);
+				pinMapping.Remove(pin);
+			}
+		}
+
+		public Project Project
+		{
+			get { return project; }
+		}
+
+		public Chip Chip
+		{
+			get { return chip; }
 		}
 	}
 

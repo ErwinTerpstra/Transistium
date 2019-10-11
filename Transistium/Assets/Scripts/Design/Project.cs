@@ -4,25 +4,25 @@ namespace Transistium.Design
 {
 	public class Project
 	{
-		public Circuit rootCircuit;
+		public HandleList<Chip> chips;
 
-		public List<Chip> chips;
-
+		public Handle<Chip> rootChipHandle;
+		
 		public Project()
 		{
-			rootCircuit = new Circuit();
-			chips = new List<Chip>();
+			chips = new HandleList<Chip>();
+
+			CreateChip(out rootChipHandle);
 		}
 
-		public Chip FindChip(string guid)
+		public Chip CreateChip(out Handle<Chip> handle)
 		{
-			foreach (Chip chip in chips)
-			{
-				if (chip.guid == guid)
-					return chip;
-			}
+			var chip = new Chip();
 
-			return null;
+			handle = chips.Add(chip);
+
+			return chip;
 		}
+
 	}
 }

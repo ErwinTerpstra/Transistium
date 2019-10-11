@@ -3,20 +3,20 @@
 namespace Transistium.Design
 {
 	[Serializable]
-	public struct Handle : IEquatable<Handle>
+	public struct Handle<T> : IEquatable<Handle<T>> where T : class
 	{
-		public static readonly Handle Invalid = new Handle(-1);
+		public static readonly Handle<T> Invalid = new Handle<T>(null);
 
-		public int index;
+		public string guid;
 
-		public Handle(int index)
+		public Handle(string guid)
 		{
-			this.index = index;
+			this.guid = guid;
 		}
 
 		public override int GetHashCode()
 		{
-			return index;
+			return guid.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
@@ -24,16 +24,16 @@ namespace Transistium.Design
 			return base.Equals(obj);
 		}
 
-		public bool Equals(Handle other)
+		public bool Equals(Handle<T> other)
 		{
-			return index == other.index;
+			return guid == other.guid;
 		}
 
-		public static bool operator ==(Handle a, Handle b)
+		public static bool operator ==(Handle<T> a, Handle<T> b)
 		{
 			return a.Equals(b);
 		}
-		public static bool operator !=(Handle a, Handle b)
+		public static bool operator !=(Handle<T> a, Handle<T> b)
 		{
 			return !a.Equals(b);
 		}

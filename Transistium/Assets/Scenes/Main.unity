@@ -302,6 +302,7 @@ MonoBehaviour:
     junction: {fileID: 7306410928130495196, guid: c2e36704f044f194a93aed5272ab52a5,
       type: 3}
     wire: {fileID: 7801942872442414129, guid: 8dbfae67e89732f49964b2d50cac7ff6, type: 3}
+    pin: {fileID: -715352520449206208, guid: 2f864656b12158d40a3d161b2b1d4e1b, type: 3}
   elementRoot: {fileID: 12107111}
   wireRoot: {fileID: 1722217313}
 --- !u!1 &550606247
@@ -934,7 +935,7 @@ PrefabInstance:
     - target: {fileID: 1554728224323376248, guid: 5a5c615b57307ec4aa95e8b01bd3347a,
         type: 3}
       propertyPath: m_Name
-      value: ButtonCreateIC
+      value: ButtonCreateChip
       objectReference: {fileID: 0}
     - target: {fileID: 1196536543246194241, guid: 5a5c615b57307ec4aa95e8b01bd3347a,
         type: 3}
@@ -1044,7 +1045,7 @@ PrefabInstance:
     - target: {fileID: 1116972865158678173, guid: 5a5c615b57307ec4aa95e8b01bd3347a,
         type: 3}
       propertyPath: m_Text
-      value: Create IC
+      value: Create chip
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5a5c615b57307ec4aa95e8b01bd3347a, type: 3}

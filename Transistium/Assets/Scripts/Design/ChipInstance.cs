@@ -4,14 +4,14 @@ namespace Transistium.Design
 {
 	public class PinInstance
 	{
-		public string pinGUID;
+		public Handle<Pin> pinHandle;
 
-		public Handle junctionHandle;
+		public Handle<Junction> junctionHandle;
 	}
 
 	public class ChipInstance
 	{
-		public string chipGUID;
+		public Handle<Chip> chipHandle;
 
 		public List<PinInstance> pins;
 
