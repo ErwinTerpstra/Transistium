@@ -88,7 +88,8 @@ namespace Transistium.Util
 					yield return new Pair<A, ComparisonResult>(a, ComparisonResult.ADDED);
 			}
 
-			foreach (var a in forward.Keys)
+			List<A> keys = new List<A>(forward.Keys);
+			foreach (var a in keys)
 			{
 				if (!source.Contains(a))
 					yield return new Pair<A, ComparisonResult>(a, ComparisonResult.REMOVED);

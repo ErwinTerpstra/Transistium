@@ -113,7 +113,7 @@ namespace Transistium.Design
 				var junction = junctions[wire.a];
 				junction.wires.Remove(handle);
 
-				if (junction.flags.Has(CircuitElementFlags.PERMANENT) && junction.wires.Count == 0)
+				if (!junction.flags.Has(CircuitElementFlags.PERMANENT) && junction.wires.Count == 0)
 					RemoveJunction(junction);
 			}
 
@@ -122,7 +122,7 @@ namespace Transistium.Design
 				var junction = junctions[wire.b];
 				junction.wires.Remove(handle);
 
-				if (junction.flags.Has(CircuitElementFlags.PERMANENT) && junction.wires.Count == 0)
+				if (!junction.flags.Has(CircuitElementFlags.PERMANENT) && junction.wires.Count == 0)
 					RemoveJunction(junction);
 			}
 
