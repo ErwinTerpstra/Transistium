@@ -24,5 +24,10 @@ namespace Transistium.Design
 			return chip;
 		}
 
+		public Chip RootChip
+		{
+			get { return chips[rootChipHandle]; }
+		}
+
 	}
 }

@@ -41,22 +41,22 @@ namespace Transistium.Interaction
 
 		private Chip chip;
 		
-		private OneToOneMapping<Transistor, TransistorBehaviour> transistorMapping;
+		private Observer<Transistor, TransistorBehaviour> transistors;
 
-		private OneToOneMapping<Junction, JunctionBehaviour> junctionMapping;
+		private Observer<Junction, JunctionBehaviour> junctions;
 
-		private OneToOneMapping<Wire, WireBehaviour> wireMapping;
+		private Observer<Wire, WireBehaviour> wires;
 
-		private OneToOneMapping<Pin, PinBehaviour> pinMapping;
+		private Observer<Pin, PinBehaviour> pins;
 
 		protected override void Awake()
 		{
 			base.Awake();
 			
-			transistorMapping		= new OneToOneMapping<Transistor, TransistorBehaviour>();
-			junctionMapping			= new OneToOneMapping<Junction, JunctionBehaviour>();
-			wireMapping				= new OneToOneMapping<Wire, WireBehaviour>();
-			pinMapping				= new OneToOneMapping<Pin, PinBehaviour>();
+			transistors	= new Observer<Transistor, TransistorBehaviour>(CreateTransistor, DestroyTransistor);
+			junctions	= new Observer<Junction, JunctionBehaviour>(CreateJunction, DestroyJunction);
+			wires		= new Observer<Wire, WireBehaviour>(CreateWire, DestroyWire);
+			pins		= new Observer<Pin, PinBehaviour>(CreatePin, DestroyPin);
 
 			project = new Project();
 			SwitchChip(project.chips[project.rootChipHandle]);
@@ -64,72 +64,27 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
-			DetectChanges(transistorMapping,	chip.circuit.transistors,	OnTransistorAdded,	OnTransistorRemoved);
-			DetectChanges(junctionMapping,		chip.circuit.junctions,		OnJunctionAdded,	OnJunctionRemoved);
-			DetectChanges(wireMapping,			chip.circuit.wires,			OnWireAdded,		OnWireRemoved);
-			DetectChanges(pinMapping,			chip.pins,					OnPinAdded,			OnPinRemoved);
-		}
-
-		private void DetectChanges<A, B>(OneToOneMapping<A, B> mapping, ICollection<A> source, Action<A> addedHandler, Action<A> removedHandler)
-		{
-			foreach (var comparisonEntr in mapping.CompareTo(source))
-			{
-				switch (comparisonEntr.second)
-				{
-					case ComparisonResult.ADDED:
-						addedHandler?.Invoke(comparisonEntr.first);
-						break;
-
-					case ComparisonResult.REMOVED:
-						removedHandler?.Invoke(comparisonEntr.first);
-						break;
-				}
-			}
+			transistors.DetectChanges();
+			junctions.DetectChanges();
+			wires.DetectChanges();
+			pins.DetectChanges();
 		}
 
 		public void SwitchChip(Chip chip)
 		{
 			if (this.chip != null)
-				LeaveChip();
+				ChipLeft?.Invoke(chip);
 
 			this.chip = chip;
 
-			EnterChip();
-		}
-
-		private void LeaveChip()
-		{
-			// Destroy all elements
-			foreach (var pair in transistorMapping)
-				Destroy(pair.Value);
-
-			foreach (var pair in junctionMapping)
-				Destroy(pair.Value);
-
-			foreach (var pair in wireMapping)
-				Destroy(pair.Value);
-
-			transistorMapping.Clear();
-			junctionMapping.Clear();
-			wireMapping.Clear();
-
-			ChipLeft?.Invoke(chip);
-		}
-
-		private void EnterChip()
-		{
-			// Handle instantiating all elements
-			foreach (var handle in chip.circuit.transistors)
-				OnTransistorAdded(handle);
-
-			foreach (var handle in chip.circuit.junctions)
-				OnJunctionAdded(handle);
-
-			foreach (var handle in chip.circuit.wires)
-				OnWireAdded(handle);
+			transistors.Observe(chip.circuit.transistors);
+			junctions.Observe(chip.circuit.junctions);
+			wires.Observe(chip.circuit.wires);
+			pins.Observe(chip.pins);
 
 			ChipEnterred?.Invoke(chip);
 		}
+
 
 		public Vector2 GetCircuitPosition(Vector3 worldPosition)
 		{
@@ -149,7 +104,7 @@ namespace Transistium.Interaction
 		public Vector3 GetJunctionPosition(Junction junction)
 		{
 			JunctionBehaviour behaviour;
-			if (!junctionMapping.TryGetValue(junction, out behaviour))
+			if (!junctions.Mapping.TryGetValue(junction, out behaviour))
 				return Vector3.zero;
 
 			return behaviour.transform.position;
@@ -163,10 +118,10 @@ namespace Transistium.Interaction
 			var elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = junction;
 
-			junctionMapping.Map(junction, junctionBehaviour);
+			junctions.Mapping.Map(junction, junctionBehaviour);
 		}
 		
-		private void OnTransistorAdded(Transistor transistor)
+		private TransistorBehaviour CreateTransistor(Transistor transistor)
 		{
 			// Instantiate the behaviour
 			TransistorBehaviour transistorBehaviour = Instantiate(prefabs.transistor, elementRoot, false);
@@ -181,24 +136,19 @@ namespace Transistium.Interaction
 			SetupJunctionBehaviour(transistor.drain, transistorBehaviour.Drain);
 			SetupJunctionBehaviour(transistor.source, transistorBehaviour.Source);
 
-			// Store the behaviour in the mapping tables
-			transistorMapping.Map(transistor, transistorBehaviour);
+			return transistorBehaviour;
 		}
 
-		private void OnTransistorRemoved(Transistor transistor)
+		private void DestroyTransistor(Transistor transistor, TransistorBehaviour behaviour)
 		{
-			if (transistorMapping.TryGetValue(transistor, out TransistorBehaviour behaviour))
-			{
-				Destroy(behaviour.gameObject);
-				transistorMapping.Remove(transistor);
-			}
+			Destroy(behaviour.gameObject);
 		}
 
-		private void OnJunctionAdded(Junction junction)
+		private JunctionBehaviour CreateJunction(Junction junction)
 		{
 			// Embedded junctions will be instantiated as part of another element (i.e. transistor)
 			if (junction.flags.Has(CircuitElementFlags.EMBEDDED))
-				return;
+				return null;
 
 			// Instantiate a new standalone junction behaviour
 			JunctionBehaviour junctionBehaviour = Instantiate(prefabs.junction, elementRoot, false);
@@ -208,37 +158,28 @@ namespace Transistium.Interaction
 			CircuitElementBehaviour elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = junction;
 
-			// Store it in the mapping
-			junctionMapping.Map(junction, junctionBehaviour);
+			return junctionBehaviour;
 		}
 
-		private void OnJunctionRemoved(Junction junction)
+		private void DestroyJunction(Junction junction, JunctionBehaviour behaviour)
 		{
-			if (junctionMapping.TryGetValue(junction, out JunctionBehaviour behaviour))
-			{
-				Destroy(behaviour.gameObject);
-				junctionMapping.Remove(junction);
-			}
+			Destroy(behaviour.gameObject);
 		}
 
-		private void OnWireAdded(Wire wire)
+		private WireBehaviour CreateWire(Wire wire)
 		{
 			WireBehaviour wireBehaviour = Instantiate(prefabs.wire, wireRoot, false);
 			wireBehaviour.Wire = wire;
 
-			wireMapping.Map(wire, wireBehaviour);
+			return wireBehaviour;
 		}
 
-		private void OnWireRemoved(Wire wire)
+		private void DestroyWire(Wire wire, WireBehaviour behaviour)
 		{
-			if (wireMapping.TryGetValue(wire, out WireBehaviour behaviour))
-			{
-				Destroy(behaviour.gameObject);
-				wireMapping.Remove(wire);
-			}
+			Destroy(behaviour.gameObject);
 		}
 
-		private void OnPinAdded(Pin pin)
+		private PinBehaviour CreatePin(Pin pin)
 		{
 			// Instantiate the pin behaviour
 			PinBehaviour pinBehaviour = Instantiate(prefabs.pin, elementRoot, false);
@@ -248,19 +189,14 @@ namespace Transistium.Interaction
 			CircuitElementBehaviour elementBehaviour = pinBehaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = pin;
 
-			// Store it in the mapping
-			pinMapping.Map(pin, pinBehaviour);
-
 			SetupJunctionBehaviour(pin.junctionHandle, pinBehaviour.Junction);
+
+			return pinBehaviour;
 		}
 
-		private void OnPinRemoved(Pin pin)
+		private void DestroyPin(Pin pin, PinBehaviour behaviour)
 		{
-			if (pinMapping.TryGetValue(pin, out PinBehaviour behaviour))
-			{
-				Destroy(behaviour.gameObject);
-				pinMapping.Remove(pin);
-			}
+			Destroy(behaviour.gameObject);
 		}
 
 		public Project Project

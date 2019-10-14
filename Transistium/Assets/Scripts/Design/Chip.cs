@@ -63,5 +63,10 @@ namespace Transistium.Design
 			pins.Remove(pinHandle);
 		}
 
+		public string NameOrDefault
+		{
+			get { return name ?? "Unnamed chip"; }
+		}
+
 	}
 }

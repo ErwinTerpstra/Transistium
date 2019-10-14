@@ -198,16 +198,20 @@ namespace Transistium.Interaction
 					else
 					{
 						var elementBehaviour = eventData.pointerPressRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
-						var junctionBehaviour = elementBehaviour.GetComponent<JunctionBehaviour>();
 
-						if (junctionBehaviour != null)
+						if (elementBehaviour != null)
 						{
-							if (junctionBehaviour.Junction.flags.Has(CircuitElementFlags.EMBEDDED))
-								elementBehaviour = junctionBehaviour.transform.parent.GetComponentInParent<CircuitElementBehaviour>();
-						}
+							var junctionBehaviour = elementBehaviour.GetComponent<JunctionBehaviour>();
 
-						if (elementBehaviour == selectedElement)
-							draggingElement = selectedElement;
+							if (junctionBehaviour != null)
+							{
+								if (junctionBehaviour.Junction.flags.Has(CircuitElementFlags.EMBEDDED))
+									elementBehaviour = junctionBehaviour.transform.parent.GetComponentInParent<CircuitElementBehaviour>();
+							}
+
+							if (elementBehaviour == selectedElement)
+								draggingElement = selectedElement;
+						}
 					}
 
 					break;
