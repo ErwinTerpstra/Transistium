@@ -4,15 +4,23 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 using Transistium.Design;
+using Transistium.Util;
 
 namespace Transistium.Interaction
 {
-	public class CircuitInteraction : MonoBehaviour, IPointerDownHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+	public delegate void CircuitElementEvent(CircuitElement element);
+
+	public class CircuitInteraction : MonoSingleton<CircuitInteraction>, IPointerDownHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 	{
 		private static readonly Rotation[] rotations = { Rotation.NONE, Rotation.ROTATE_90, Rotation.ROTATE_180, Rotation.ROTATE_270 };
 
+		public event CircuitElementEvent SelectionChanged;
+
 		[SerializeField]
 		private Transform selectionIndicator = null;
+
+		[SerializeField]
+		private float gridSize = 0.2f;
 
 		private CircuitManager circuitManager;
 
@@ -24,6 +32,15 @@ namespace Transistium.Interaction
 
 		private Wire currentWire;
 
+		protected override void Awake()
+		{
+			base.Awake();
+
+			currentWire = null;
+
+			selectionIndicator.gameObject.SetActive(false);
+		}
+
 		private void Start()
 		{
 			circuitManager = CircuitManager.Instance;
@@ -31,10 +48,6 @@ namespace Transistium.Interaction
 			circuitManager.ChipLeft += OnChipLeft;
 
 			circuit = circuitManager.Chip.circuit;
-
-			currentWire = null;
-
-			selectionIndicator.gameObject.SetActive(false);
 		}
 
 		private void Update()
@@ -49,13 +62,6 @@ namespace Transistium.Interaction
 			}
 			else
 				selectionIndicator.gameObject.SetActive(false);
-
-			if (Input.GetKeyDown(KeyCode.T))
-			{
-				var transistor = circuit.AddTransistor(out _);
-
-				transistor.transform.position = Vector2.zero;// GetCircuitPosition(eventData);
-			}
 		}
 
 
@@ -75,14 +81,14 @@ namespace Transistium.Interaction
 					else if (junctionBehaviour != null)
 						circuit.RemoveJunction(junctionBehaviour.Junction);
 
-					selectedElement = null;
+					Select(null);
 					return;
 				}
 			}
 
 			if (Input.GetKey(KeyCode.Escape))
 			{
-				selectedElement = null;
+				Select(null);
 				return;
 			}
 
@@ -93,9 +99,21 @@ namespace Transistium.Interaction
 
 		}
 
+		private void Select(CircuitElementBehaviour elementBehaviour)
+		{
+			selectedElement = elementBehaviour;
+
+			SelectionChanged?.Invoke(elementBehaviour?.Element);
+		}
+
 		private Vector2 GetCircuitPosition(PointerEventData eventData)
 		{
 			return circuitManager.GetCircuitPosition(eventData.pointerCurrentRaycast.worldPosition);
+		}
+
+		private Vector2 SnapPosition(Vector2 position)
+		{
+			return new Vector2(Mathf.Round(position.x / gridSize) * gridSize, Mathf.Round(position.y / gridSize) * gridSize);
 		}
 
 		private void StartWire(PointerEventData eventData, JunctionBehaviour junctionBehaviour)
@@ -121,7 +139,7 @@ namespace Transistium.Interaction
 
 		private void UpdateElement(PointerEventData eventData)
 		{
-			draggingElement.Element.transform.position = GetCircuitPosition(eventData);
+			draggingElement.Element.transform.position = SnapPosition(GetCircuitPosition(eventData));
 		}
 
 		private void HandleLeftClick(PointerEventData eventData)
@@ -146,11 +164,11 @@ namespace Transistium.Interaction
 						elementBehaviour = junctionBehaviour.transform.parent.GetComponentInParent<CircuitElementBehaviour>();
 				}
 
-				selectedElement = elementBehaviour;
+				Select(elementBehaviour);
 				return;
 			}
 
-			selectedElement = null;
+			Select(null);
 		}
 
 		private void HandleRightClick(PointerEventData eventData)
@@ -235,7 +253,7 @@ namespace Transistium.Interaction
 				else
 				{
 					var junction = circuit.AddJunction(CircuitElementFlags.NONE, out _);
-					junction.transform.position = GetCircuitPosition(eventData);
+					junction.transform.position = SnapPosition(GetCircuitPosition(eventData));
 
 					ConnectWire(eventData, junction);
 				}
@@ -270,9 +288,15 @@ namespace Transistium.Interaction
 		{
 			circuit = chip.circuit;
 		}
+
 		private void OnChipLeft(Chip chip)
 		{
 
+		}
+
+		public CircuitElement SelectedElement
+		{
+			get { return selectedElement?.Element; }
 		}
 
 	}

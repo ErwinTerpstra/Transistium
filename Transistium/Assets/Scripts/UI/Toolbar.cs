@@ -53,7 +53,7 @@ namespace Transistium.UI
 		{
 			var chipButton = Instantiate(chipButtonPrefab, chipRoot, false);
 
-			chipButton.Configure(chip.NameOrDefault);
+			chipButton.Configure(chip);
 
 			chipButton.AddClicked += OnChipAddClicked;
 			chipButton.EditClicked += OnChipEditClicked;
@@ -69,12 +69,12 @@ namespace Transistium.UI
 
 		private void OnAddTransistorClicked()
 		{
-
+			circuitManager.Chip.circuit.AddTransistor(out _);
 		}
 
 		private void OnAddPinClicked()
 		{
-
+			circuitManager.Chip.AddPin(out _);
 		}
 
 		private void OnCreateChipClicked()

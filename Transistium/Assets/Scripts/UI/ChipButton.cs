@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Transistium.Design;
+
 namespace Transistium.UI
 {
 	public delegate void ChipButtonEvent(ChipButton button);
@@ -22,15 +24,29 @@ namespace Transistium.UI
 		[SerializeField]
 		private TMPro.TextMeshProUGUI labelName = null;
 
+		private Chip chip;
+
 		private void Awake()
 		{
 			buttonAdd.onClick.AddListener(OnAddClicked);
 			buttonEdit.onClick.AddListener(OnEditClicked);
 		}
 
-		public void Configure(string name)
+		private void LateUpdate()
 		{
-			labelName.text = name;
+			UpdateName();
+		}
+
+		public void Configure(Chip chip)
+		{
+			this.chip = chip;
+
+			UpdateName();
+		}
+
+		private void UpdateName()
+		{
+			labelName.text = chip.NameOrDefault;
 		}
 
 		private void OnAddClicked()

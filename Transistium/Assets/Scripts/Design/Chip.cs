@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using UnityEngine;
+
 namespace Transistium.Design
 {
 	public class Pin : CircuitElement
@@ -7,6 +9,11 @@ namespace Transistium.Design
 		public string name;
 
 		public Handle<Junction> junctionHandle;
+
+		public string NameOrDefault
+		{
+			get { return name ?? "???"; }
+		}
 	}
 
 	public class Chip
@@ -31,9 +38,12 @@ namespace Transistium.Design
 			// TODO: add something to "hide" these pins on the outside of a ChipInstance
 
 			var vccPin = AddPin(out vccPinHandle);
+			vccPin.transform.position = new Vector2(0.0f, 2.0f);
+			vccPin.transform.rotation = Rotation.ROTATE_180;
 			vccPin.name = "VCC";
 
 			var groundPin = AddPin(out groundPinHandle);
+			groundPin.transform.position = new Vector2(0.0f, -2.0f);
 			groundPin.name = "GND";
 		}
 
