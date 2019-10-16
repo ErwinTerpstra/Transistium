@@ -2,14 +2,14 @@
 
 namespace Transistium.Design
 {
-	public class PinInstance
+	public class PinInstance : CircuitElement
 	{
 		public Handle<Pin> pinHandle;
 
 		public Handle<Junction> junctionHandle;
 	}
 
-	public class ChipInstance
+	public class ChipInstance : CircuitElement
 	{
 		public Handle<Chip> chipHandle;
 

@@ -19,6 +19,8 @@ namespace Transistium.Interaction
 		public WireBehaviour wire;
 
 		public PinBehaviour pin;
+
+		public ChipInstanceBehaviour chipInstance;
 	}
 
 	public delegate void ChipEvent(Chip chip);
@@ -39,7 +41,7 @@ namespace Transistium.Interaction
 
 		private Project project;
 
-		private Chip chip;
+		private Chip currentChip;
 		
 		private Observer<Transistor, TransistorBehaviour> transistors;
 
@@ -49,14 +51,17 @@ namespace Transistium.Interaction
 
 		private Observer<Pin, PinBehaviour> pins;
 
+		private Observer<ChipInstance, ChipInstanceBehaviour> chipInstances;
+
 		protected override void Awake()
 		{
 			base.Awake();
-			
-			transistors	= new Observer<Transistor, TransistorBehaviour>(CreateTransistor, DestroyTransistor);
-			junctions	= new Observer<Junction, JunctionBehaviour>(CreateJunction, DestroyJunction);
-			wires		= new Observer<Wire, WireBehaviour>(CreateWire, DestroyWire);
-			pins		= new Observer<Pin, PinBehaviour>(CreatePin, DestroyPin);
+
+			chipInstances	= new Observer<ChipInstance,	ChipInstanceBehaviour>(CreateChipInstance, DestroyChipInstance);
+			transistors		= new Observer<Transistor,		TransistorBehaviour>(CreateTransistor, DestroyTransistor);
+			junctions		= new Observer<Junction,		JunctionBehaviour>(CreateJunction, DestroyJunction);
+			wires			= new Observer<Wire,			WireBehaviour>(CreateWire, DestroyWire);
+			pins			= new Observer<Pin,				PinBehaviour>(CreatePin, DestroyPin);
 
 			project = new Project();
 			SwitchChip(project.chips[project.rootChipHandle]);
@@ -64,6 +69,7 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
+			chipInstances.DetectChanges();
 			transistors.DetectChanges();
 			junctions.DetectChanges();
 			wires.DetectChanges();
@@ -72,11 +78,12 @@ namespace Transistium.Interaction
 
 		public void SwitchChip(Chip chip)
 		{
-			if (this.chip != null)
+			if (this.currentChip != null)
 				ChipLeft?.Invoke(chip);
 
-			this.chip = chip;
+			this.currentChip = chip;
 
+			chipInstances.Observe(chip.circuit.chipInstances);
 			transistors.Observe(chip.circuit.transistors);
 			junctions.Observe(chip.circuit.junctions);
 			wires.Observe(chip.circuit.wires);
@@ -84,7 +91,6 @@ namespace Transistium.Interaction
 
 			ChipEnterred?.Invoke(chip);
 		}
-
 
 		public Vector2 GetCircuitPosition(Vector3 worldPosition)
 		{
@@ -98,7 +104,7 @@ namespace Transistium.Interaction
 
 		public Vector3 GetJunctionPosition(Handle<Junction> handle)
 		{
-			return GetJunctionPosition(chip.circuit.junctions[handle]);
+			return GetJunctionPosition(currentChip.circuit.junctions[handle]);
 		}
 
 		public Vector3 GetJunctionPosition(Junction junction)
@@ -112,7 +118,7 @@ namespace Transistium.Interaction
 
 		private void SetupJunctionBehaviour(Handle<Junction> handle, JunctionBehaviour junctionBehaviour)
 		{
-			var junction = chip.circuit.junctions[handle];
+			var junction = currentChip.circuit.junctions[handle];
 			junctionBehaviour.Junction = junction;
 
 			var elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
@@ -121,6 +127,26 @@ namespace Transistium.Interaction
 			junctions.Mapping.Map(junction, junctionBehaviour);
 		}
 		
+		private ChipInstanceBehaviour CreateChipInstance(ChipInstance chipInstance)
+		{
+			var chip = project.chips[chipInstance.chipHandle];
+
+			// Instantiate the behaviour
+			ChipInstanceBehaviour chipInstanceBehaviour = Instantiate(prefabs.chipInstance, elementRoot, false);
+			chipInstanceBehaviour.Configure(chip, chipInstance);
+
+			// Link the element behaviour
+			CircuitElementBehaviour elementBehaviour = chipInstanceBehaviour.GetComponent<CircuitElementBehaviour>();
+			elementBehaviour.Element = chipInstance;
+
+			return chipInstanceBehaviour;
+		}
+
+		private void DestroyChipInstance(ChipInstance chipInstance, ChipInstanceBehaviour behaviour)
+		{
+			Destroy(behaviour.gameObject);
+		}
+
 		private TransistorBehaviour CreateTransistor(Transistor transistor)
 		{
 			// Instantiate the behaviour
@@ -204,9 +230,9 @@ namespace Transistium.Interaction
 			get { return project; }
 		}
 
-		public Chip Chip
+		public Chip CurrentChip
 		{
-			get { return chip; }
+			get { return currentChip; }
 		}
 	}
 

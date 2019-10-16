@@ -10,11 +10,8 @@ namespace Transistium.Interaction
 
 		private void LateUpdate()
 		{
-			if (!element.flags.Has(CircuitElementFlags.EMBEDDED))
-			{
-				transform.localPosition = element.transform.position;
-				transform.localRotation = Quaternion.Euler(0, 0, -((int)element.transform.rotation) * 90);
-			}
+			transform.localPosition = element.transform.position;
+			transform.localRotation = Quaternion.Euler(0, 0, -((int)element.transform.rotation) * 90);
 		}
 
 		public CircuitElement Element

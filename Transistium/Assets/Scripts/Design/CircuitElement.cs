@@ -9,7 +9,7 @@ namespace Transistium.Design
 		STATIC = 1,			// Static elements can't be moved
 		PERMANENT = 2,      // Permanent elements can't be removed
 
-		// Embedded elements are directly managed by another part and shound't be created/destroyed separate from their embedder
+		// Embedded elements are directly managed by another part and shouldn't be created/destroyed separate from their embedder
 		EMBEDDED = STATIC | PERMANENT
 	}
 

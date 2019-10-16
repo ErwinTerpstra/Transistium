@@ -35,8 +35,8 @@ namespace Transistium.UI
 
 			levels.Add("Root");
 
-			if (circuitManager.Chip != circuitManager.Project.RootChip)
-				levels.Add(circuitManager.Chip.NameOrDefault);
+			if (circuitManager.CurrentChip != circuitManager.Project.RootChip)
+				levels.Add(circuitManager.CurrentChip.NameOrDefault);
 
 			breadcrumbs.SetLevels(levels);
 		}

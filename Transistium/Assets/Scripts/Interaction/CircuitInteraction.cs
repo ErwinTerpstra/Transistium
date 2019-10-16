@@ -47,7 +47,7 @@ namespace Transistium.Interaction
 			circuitManager.ChipEnterred += OnChipEnterred;
 			circuitManager.ChipLeft += OnChipLeft;
 
-			circuit = circuitManager.Chip.circuit;
+			circuit = circuitManager.CurrentChip.circuit;
 		}
 
 		private void Update()
@@ -55,7 +55,7 @@ namespace Transistium.Interaction
 			if (selectedElement != null)
 			{
 				// Update the position of the selection indicator
-				selectionIndicator.position = circuitManager.GetWorldPosition(selectedElement.Element.transform.position);
+				selectionIndicator.localPosition = selectedElement.Element.transform.position;
 				selectionIndicator.gameObject.SetActive(true);
 
 				HandleSelectedElementShortcuts();

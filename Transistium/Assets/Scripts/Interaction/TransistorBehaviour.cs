@@ -17,18 +17,6 @@ namespace Transistium.Interaction
 
 		private Transistor transistor;
 
-		private void LateUpdate()
-		{
-			UpdateJunction(gate);
-			UpdateJunction(drain);
-			UpdateJunction(source);
-		}
-
-		private void UpdateJunction(JunctionBehaviour junctionBehaviour)
-		{
-			junctionBehaviour.Junction.transform.position = CircuitManager.Instance.GetCircuitPosition(junctionBehaviour.transform.position);
-		}
-
 		public Transistor Transistor
 		{
 			get { return transistor; }

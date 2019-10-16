@@ -28,7 +28,7 @@ namespace Transistium.UI
 			circuitInteraction = CircuitInteraction.Instance;
 			circuitInteraction.SelectionChanged += OnSelectionChanged;
 
-			OnChipEnterred(circuitManager.Chip);
+			OnChipEnterred(circuitManager.CurrentChip);
 			OnSelectionChanged(circuitInteraction.SelectedElement);
 		}
 

@@ -708,6 +708,8 @@ MonoBehaviour:
       type: 3}
     wire: {fileID: 7801942872442414129, guid: 8dbfae67e89732f49964b2d50cac7ff6, type: 3}
     pin: {fileID: -715352520449206208, guid: 2f864656b12158d40a3d161b2b1d4e1b, type: 3}
+    chipInstance: {fileID: 7017840845814895229, guid: 98a96f4d6757ebb44b302d0e9e45d86a,
+      type: 3}
   elementRoot: {fileID: 12107111}
   wireRoot: {fileID: 1722217313}
 --- !u!1001 &490576216
@@ -1469,7 +1471,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0010869849, y: -0.000045776367}
+  m_AnchoredPosition: {x: 0.0010869849, y: 0.00022504923}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &607850305
@@ -2921,6 +2923,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SelectionIndicator
+      objectReference: {fileID: 0}
+    - target: {fileID: 4729850095336603676, guid: 14b4141854db7de4fadd457ad6d02f3d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1474037223365743343, guid: 14b4141854db7de4fadd457ad6d02f3d,
         type: 3}

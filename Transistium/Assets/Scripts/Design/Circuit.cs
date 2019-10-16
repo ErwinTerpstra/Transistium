@@ -46,7 +46,7 @@ namespace Transistium.Design
 			
 			return junction;
 		}
-
+		
 		public Wire AddWire(Junction junction, out Handle<Wire> handle)
 		{
 			var junctionHandle = junctions.LookupHandle(junction);
@@ -68,11 +68,15 @@ namespace Transistium.Design
 				chipHandle = chipHandle
 			};
 
-			foreach (var pinHandle in chip.pins)
+			foreach (var pin in chip.pins)
 			{
-				var pinInstance = new PinInstance();
+				var pinInstance = new PinInstance()
+				{
+					pinHandle = chip.pins.LookupHandle(pin),
+					flags = CircuitElementFlags.EMBEDDED,
+				};
 
-				AddJunction(CircuitElementFlags.EMBEDDED | CircuitElementFlags.PERMANENT | CircuitElementFlags.STATIC, out pinInstance.junctionHandle);
+				AddJunction(CircuitElementFlags.EMBEDDED, out pinInstance.junctionHandle);
 
 				chipInstance.pins.Add(pinInstance);
 			}

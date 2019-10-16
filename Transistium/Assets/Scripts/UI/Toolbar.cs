@@ -69,12 +69,12 @@ namespace Transistium.UI
 
 		private void OnAddTransistorClicked()
 		{
-			circuitManager.Chip.circuit.AddTransistor(out _);
+			circuitManager.CurrentChip.circuit.AddTransistor(out _);
 		}
 
 		private void OnAddPinClicked()
 		{
-			circuitManager.Chip.AddPin(out _);
+			circuitManager.CurrentChip.AddPin(out _);
 		}
 
 		private void OnCreateChipClicked()
@@ -85,6 +85,17 @@ namespace Transistium.UI
 
 		private void OnChipAddClicked(ChipButton button)
 		{
+			var chip = chips.Mapping[button];
+			var project = circuitManager.Project;
+
+			if (project.DetectCircularReferences(circuitManager.CurrentChip, chip))
+			{
+				Debug.LogWarning("Prevented instantiating chip that would result in a circular reference!");
+				return;
+			}
+
+			circuitManager.CurrentChip.circuit.InstantiateChip(chip, project.chips.LookupHandle(chip));
+
 		}
 
 		private void OnChipEditClicked(ChipButton button)

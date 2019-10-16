@@ -24,6 +24,22 @@ namespace Transistium.Design
 			return chip;
 		}
 
+		public bool DetectCircularReferences(Chip haystack, Chip needle)
+		{
+			if (haystack == needle)
+				return true;
+
+			foreach (var instance in haystack.circuit.chipInstances)
+			{
+				var chip = chips[instance.chipHandle];
+
+				if (DetectCircularReferences(chip, needle))
+					return true;
+			}
+
+			return false;
+		}
+
 		public Chip RootChip
 		{
 			get { return chips[rootChipHandle]; }
