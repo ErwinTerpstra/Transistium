@@ -39,7 +39,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 250, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2445689111123918772
 MonoBehaviour:
@@ -187,6 +187,31 @@ PrefabInstance:
       propertyPath: m_Name
       value: LabelName
       objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 4098
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 45b8033fb907ed94d8f84021589d3356, type: 2}
     - target: {fileID: 1766186591045649784, guid: 020a8cb7afcdb4c458e2058f605f8aef,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -291,21 +316,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 4098
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_firstOverflowCharacterIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6675452429347767882, guid: 020a8cb7afcdb4c458e2058f605f8aef,
         type: 3}

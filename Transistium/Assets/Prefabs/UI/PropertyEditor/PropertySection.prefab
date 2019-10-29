@@ -56,7 +56,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 5
+  m_Spacing: 0
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -213,7 +213,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1782779447555449589
 MonoBehaviour:
@@ -370,7 +370,7 @@ PrefabInstance:
     - target: {fileID: 8218825847974757078, guid: cc1c3eb1dfc81544ba0d5ff3fc67b343,
         type: 3}
       propertyPath: m_textInfo.lineCount
-      value: 11
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8218825847974757078, guid: cc1c3eb1dfc81544ba0d5ff3fc67b343,
         type: 3}
@@ -385,7 +385,7 @@ PrefabInstance:
     - target: {fileID: 8218825847974757078, guid: cc1c3eb1dfc81544ba0d5ff3fc67b343,
         type: 3}
       propertyPath: m_firstOverflowCharacterIndex
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 8218825847974757078, guid: cc1c3eb1dfc81544ba0d5ff3fc67b343,
         type: 3}

@@ -88,7 +88,7 @@ namespace Transistium.UI
 			var chip = chips.Mapping[button];
 			var project = circuitManager.Project;
 
-			if (project.DetectCircularReferences(circuitManager.CurrentChip, chip))
+			if (project.DetectCircularReferences(chip, circuitManager.CurrentChip))
 			{
 				Debug.LogWarning("Prevented instantiating chip that would result in a circular reference!");
 				return;

@@ -8,8 +8,13 @@ using Transistium.Util;
 
 namespace Transistium.Interaction
 {
+	public delegate void PinInstanceEvent(PinInstance pinInstance, PinInstanceBehaviour behaviour);
+
 	public class ChipInstanceBehaviour : MonoBehaviour
 	{
+		public event PinInstanceEvent PinInstanceCreated;
+		public event PinInstanceEvent PinInstanceDestroyed;
+
 		[SerializeField]
 		private PinInstanceBehaviour pinInstancePrefab = null;
 
@@ -124,28 +129,24 @@ namespace Transistium.Interaction
 		private PinInstanceBehaviour CreatePinInstanceBehaviour(PinInstance pinInstance)
 		{
 			var pin = chip.pins[pinInstance.pinHandle];
-			var junction = CircuitManager.Instance.CurrentChip.circuit.junctions[pinInstance.junctionHandle];
 
 			// Setup pin instance
-			PinInstanceBehaviour pinInstanceBehaviour = Instantiate(pinInstancePrefab, pinInstanceRoot, false);
-			pinInstanceBehaviour.Configure(pin, pinInstance);
+			PinInstanceBehaviour behaviour = Instantiate(pinInstancePrefab, pinInstanceRoot, false);
+			behaviour.Configure(pin, pinInstance);
 
-			CircuitElementBehaviour elementBehaviour = pinInstanceBehaviour.GetComponent<CircuitElementBehaviour>();
+			CircuitElementBehaviour elementBehaviour = behaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = pinInstance;
 
-			// Setup junction
-			JunctionBehaviour junctionBehaviour = pinInstanceBehaviour.Junction;
-			junctionBehaviour.Junction = junction;
+			PinInstanceCreated?.Invoke(pinInstance, behaviour);
 
-			CircuitElementBehaviour junctionElementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
-			junctionElementBehaviour.Element = junction;
-
-			return pinInstanceBehaviour;
+			return behaviour;
 		}
 
 		private void DestroyPinInstanceBehaviour(PinInstance pinInstance, PinInstanceBehaviour behaviour)
 		{
 			Destroy(behaviour.gameObject);
+
+			PinInstanceDestroyed?.Invoke(pinInstance, behaviour);
 		}
 
 		public Chip Chip => chip;

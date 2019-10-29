@@ -40,6 +40,16 @@ namespace Transistium.Design
 			return false;
 		}
 
+		public void UpdateChipInstances()
+		{
+
+		}
+
+		public void UpdateChipInstance()
+		{
+
+		}
+
 		public Chip RootChip
 		{
 			get { return chips[rootChipHandle]; }

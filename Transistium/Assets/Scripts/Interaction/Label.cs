@@ -7,9 +7,13 @@ namespace Transistium.Interaction
 {
 	public class Label : MonoBehaviour
 	{
+		[SerializeField]
+		private bool keepUpright = true;
+
 		private void LateUpdate()
 		{
-			transform.rotation = Quaternion.identity;
+			if (keepUpright)
+				transform.rotation = Quaternion.identity;
 		}
 	}
 }

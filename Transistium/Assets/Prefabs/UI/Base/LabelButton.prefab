@@ -187,6 +187,56 @@ PrefabInstance:
       propertyPath: m_Name
       value: Label
       objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textInfo.characterCount
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textInfo.spaceCount
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textInfo.pageCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_text
+      value: Button
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 4128
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 45b8033fb907ed94d8f84021589d3356, type: 2}
     - target: {fileID: 1766186591045649784, guid: 020a8cb7afcdb4c458e2058f605f8aef,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -291,66 +341,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textInfo.pageCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_text
-      value: Button
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_firstOverflowCharacterIndex
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 4128
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_fontColor.r
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_fontColor.g
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_fontColor.b
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6088993018551751502, guid: 020a8cb7afcdb4c458e2058f605f8aef,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4281545523
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 020a8cb7afcdb4c458e2058f605f8aef, type: 3}

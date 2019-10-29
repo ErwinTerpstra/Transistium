@@ -133,6 +133,8 @@ namespace Transistium.Interaction
 
 			// Instantiate the behaviour
 			ChipInstanceBehaviour chipInstanceBehaviour = Instantiate(prefabs.chipInstance, elementRoot, false);
+			chipInstanceBehaviour.PinInstanceCreated += OnPinInstanceCreated;
+			chipInstanceBehaviour.PinInstanceDestroyed += OnPinInstanceDestroyed;
 			chipInstanceBehaviour.Configure(chip, chipInstance);
 
 			// Link the element behaviour
@@ -223,6 +225,16 @@ namespace Transistium.Interaction
 		private void DestroyPin(Pin pin, PinBehaviour behaviour)
 		{
 			Destroy(behaviour.gameObject);
+		}
+
+		private void OnPinInstanceCreated(PinInstance pinInstance, PinInstanceBehaviour behaviour)
+		{
+			SetupJunctionBehaviour(pinInstance.junctionHandle, behaviour.Junction);
+		}
+
+		private void OnPinInstanceDestroyed(PinInstance pinInstance, PinInstanceBehaviour behaviour)
+		{
+
 		}
 
 		public Project Project
