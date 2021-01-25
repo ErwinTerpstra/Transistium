@@ -1,19 +1,36 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 using Transistium.Util;
 
+using Newtonsoft.Json;
+
 namespace Transistium.Design
 {
-	[Serializable]
-	public class HandleList<T> : ICollection<T> where T : class
+	[Serializable, JsonObject]
+	public class HandleList<T> : ICollection<T>, ISerializable where T : class
 	{
-		private List<Pair<string, T>> elements;
+		public class ElementsList : List<Pair<string, T>> { }
+
+		[JsonProperty]
+		private ElementsList elements;
+
+
+		public int Count => elements.Count;
+
+		public bool IsReadOnly => false;
 
 		public HandleList()
 		{
-			elements = new List<Pair<string, T>>();
+			elements = new ElementsList();
+		}
+
+		public HandleList(SerializationInfo info, StreamingContext context) : this()
+		{
+			var list = info.GetValue("elements", typeof(ElementsList)) as ElementsList;
+			elements.AddRange(list);
 		}
 
 		public T this[Handle<T> handle]
@@ -71,6 +88,7 @@ namespace Transistium.Design
 
 			return Handle<T>.Invalid;
 		}
+
 		public bool Contains(T item)
 		{
 			return LookupHandle(item) != Handle<T>.Invalid;
@@ -105,6 +123,11 @@ namespace Transistium.Design
 				yield return elements[i].second;
 		}
 
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			info.AddValue("elements", elements);
+		}
+
 		#region Explicit interface definitions
 		void ICollection<T>.Add(T item)
 		{
@@ -121,16 +144,6 @@ namespace Transistium.Design
 			return GetEnumerator();
 		}
 		#endregion
-
-		public int Count
-		{
-			get { return elements.Count; }
-		}
-
-		public bool IsReadOnly
-		{
-			get { return false; }
-		}
 
 	}
 

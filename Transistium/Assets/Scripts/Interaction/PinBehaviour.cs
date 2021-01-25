@@ -14,13 +14,6 @@ namespace Transistium.Interaction
 		private TMPro.TMP_Text labelName = null;
 
 		private Pin pin;
-
-		private void LateUpdate()
-		{
-			if (pin != null)
-				labelName.text = pin.NameOrDefault;
-		}
-
 		public Pin Pin
 		{
 			get => pin;
@@ -28,5 +21,12 @@ namespace Transistium.Interaction
 		}
 
 		public JunctionBehaviour Junction => junction;
+
+		private void LateUpdate()
+		{
+			if (pin != null)
+				labelName.text = pin.NameOrDefault;
+		}
+
 	}
 }

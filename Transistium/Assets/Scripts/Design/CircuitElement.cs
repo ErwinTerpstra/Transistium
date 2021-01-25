@@ -11,6 +11,8 @@ namespace Transistium.Design
 
 		// Embedded elements are directly managed by another part and shouldn't be created/destroyed separate from their embedder
 		EMBEDDED = STATIC | PERMANENT
+
+
 	}
 
 	public class CircuitElement

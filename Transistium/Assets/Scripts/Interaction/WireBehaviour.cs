@@ -1,82 +1,90 @@
 ﻿using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
 
 using Transistium.Design;
 
 namespace Transistium.Interaction
 {
-	public class WireBehaviour : MonoBehaviour
+	public class WireBehaviour : Graphic
 	{
+		[SerializeField]
+		private float width = 4.0f;
+
 		private Wire wire;
 
-		private LineRenderer lineRenderer;
+		private List<Vector3> pathBuffer;
 
-		private new PolygonCollider2D collider;
+		private List<Vector2> vertexBuffer;
 
-		private List<Vector3> vertexBuffer;
+		private UIVertex[] quadBuffer;
 
-		private List<Vector2> colliderBuffer;
-
-		private void Awake()
+		public Wire Wire
 		{
-			lineRenderer = GetComponent<LineRenderer>();
-			collider = GetComponent<PolygonCollider2D>();
-
-			vertexBuffer = new List<Vector3>();
-			colliderBuffer = new List<Vector2>();
+			get => wire;
+			set
+			{
+				wire = value;
+				SetVerticesDirty();
+			}
 		}
 
-		private void LateUpdate()
+		protected override void Awake()
 		{
-			UpdateVertexBuffer();
-			UpdateLineRenderer();
-			UpdateCollider();
+			base.Awake();
+
+			pathBuffer = new List<Vector3>();
+			vertexBuffer = new List<Vector2>();
+		}
+
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+
+			quadBuffer = new UIVertex[4];
+		}
+
+		private void Update()
+		{
+			SetVerticesDirty();
+		}
+
+		private void UpdatePathBuffer()
+		{
+			if (wire == null)
+				return;
+
+			pathBuffer.Clear();
+
+			if (wire.a != Handle<Junction>.Invalid)
+				pathBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.a));
+
+			foreach (var vertex in wire.vertices)
+				pathBuffer.Add(CircuitManager.Instance.GetWorldPosition(vertex));
+
+			if (wire.b != Handle<Junction>.Invalid)
+				pathBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.b));
 		}
 
 		private void UpdateVertexBuffer()
 		{
 			vertexBuffer.Clear();
 
-			if (wire.a != Handle<Junction>.Invalid)
-				vertexBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.a));
-
-			foreach (var vertex in wire.vertices)
-				vertexBuffer.Add(CircuitManager.Instance.GetWorldPosition(vertex));
-
-			if (wire.b != Handle<Junction>.Invalid)
-				vertexBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.b));
-		}
-
-		private void UpdateLineRenderer()
-		{
-			lineRenderer.positionCount = vertexBuffer.Count;
-
-			for (int i = 0; i < vertexBuffer.Count; ++i)
-				lineRenderer.SetPosition(i, vertexBuffer[i]);
-		}
-
-		private void UpdateCollider()
-		{
-			colliderBuffer.Clear();
-
-			for (int i = 0; i < vertexBuffer.Count * 2; ++i)
-				colliderBuffer.Add(Vector2.zero);
-
-			for (int i = 0; i < vertexBuffer.Count; ++i)
+			for (int i = 0; i < pathBuffer.Count; ++i)
 			{
 				bool hasPrevious = i > 0;
-				bool hasNext = i < (vertexBuffer.Count - 1);
+				bool hasNext = i < (pathBuffer.Count - 1);
 
 				// Retrieve coordinates of the current vertex
-				Vector2 currentVertex = transform.InverseTransformPoint(vertexBuffer[i]);
+				Vector2 currentVertex = transform.InverseTransformPoint(pathBuffer[i]);
 
 				// Calculate a smoothed tangent vector to create a line with non-zero width
 				Vector2 forward = Vector2.zero;
 
 				if (hasPrevious)
 				{
-					Vector2 previousVertex = transform.InverseTransformPoint(vertexBuffer[i - 1]);
+					Vector2 previousVertex = transform.InverseTransformPoint(pathBuffer[i - 1]);
 
 					Vector2 previousToCurrent = (currentVertex - previousVertex).normalized;
 					forward += previousToCurrent;
@@ -84,7 +92,7 @@ namespace Transistium.Interaction
 
 				if (hasNext)
 				{
-					Vector2 nextVertex = transform.InverseTransformPoint(vertexBuffer[i + 1]);
+					Vector2 nextVertex = transform.InverseTransformPoint(pathBuffer[i + 1]);
 
 					Vector2 currentToNext = (nextVertex - currentVertex).normalized;
 					forward += currentToNext;
@@ -94,30 +102,41 @@ namespace Transistium.Interaction
 
 				Vector2 tangent = VectorUtil.RotateCW(forward);
 
-				// Calculate the line width at this vertex
-				float t = i / (vertexBuffer.Count - 1);
-				float width = lineRenderer.widthCurve.Evaluate(t);
-
 				// Calculate the tangent positions
 				Vector2 left = currentVertex - tangent * width * 0.5f;
 				Vector2 right = currentVertex + tangent * width * 0.5f;
 
 				// Add vertices to the list
-				colliderBuffer[i] = left;
-				colliderBuffer[colliderBuffer.Count - 1 - i] = right;
+				vertexBuffer.Add(left);
+				vertexBuffer.Add(right);
+			}
+		}
+
+		protected override void OnPopulateMesh(VertexHelper vh)
+		{
+			UpdatePathBuffer();
+			UpdateVertexBuffer();
+
+			vh.Clear();
+
+			for (int i = 0; i < 4; ++i)
+			{
+				ref UIVertex vertex = ref quadBuffer[i];
+				vertex.color = color;
 			}
 
+			for (int i = 0; i < vertexBuffer.Count - 3; i += 2)
+			{
+				quadBuffer[0].position = vertexBuffer[i + 0];
+				quadBuffer[1].position = vertexBuffer[i + 1];
+				quadBuffer[2].position = vertexBuffer[i + 3];
+				quadBuffer[3].position = vertexBuffer[i + 2];
 
-			collider.pathCount = 1;
-			collider.SetPath(0, colliderBuffer);
+				vh.AddUIVertexQuad(quadBuffer);
+			}
+
 		}
 
-
-		public Wire Wire
-		{
-			get => wire;
-			set => wire = value;
-		}
 	}
 
 }

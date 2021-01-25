@@ -22,6 +22,9 @@ namespace Transistium.UI
 		private Button buttonCreateChip = null;
 
 		[SerializeField]
+		private Button buttonSaveProject = null;
+
+		[SerializeField]
 		private Transform chipRoot = null;
 
 		[SerializeField]
@@ -42,6 +45,8 @@ namespace Transistium.UI
 			buttonAddPin.onClick.AddListener(OnAddPinClicked);
 
 			buttonCreateChip.onClick.AddListener(OnCreateChipClicked);
+
+			buttonSaveProject.onClick.AddListener(OnSaveProjectClicked);
 		}
 
 		private void LateUpdate()
@@ -102,6 +107,11 @@ namespace Transistium.UI
 		{
 			var chip = chips.Mapping[button];
 			circuitManager.SwitchChip(chip);
+		}
+
+		private void OnSaveProjectClicked()
+		{
+			circuitManager.StoreProject();
 		}
 
 	}

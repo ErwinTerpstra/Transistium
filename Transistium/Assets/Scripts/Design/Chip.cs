@@ -21,19 +21,6 @@ namespace Transistium.Design
 		{
 			circuit = new Circuit();
 			pins = new HandleList<Pin>();
-
-			// Create the VCC and ground pins
-			// These pins are always added
-			// TODO: add something to "hide" these pins on the outside of a ChipInstance
-
-			var vccPin = AddPin(out vccPinHandle);
-			vccPin.transform.position = new Vector2(0.0f, 2.0f);
-			vccPin.transform.rotation = Rotation.ROTATE_180;
-			vccPin.name = "VCC";
-
-			var groundPin = AddPin(out groundPinHandle);
-			groundPin.transform.position = new Vector2(0.0f, -2.0f);
-			groundPin.name = "GND";
 		}
 
 		public Pin AddPin(out Handle<Pin> handle)
@@ -65,6 +52,26 @@ namespace Transistium.Design
 		public string NameOrDefault
 		{
 			get { return name ?? "Unnamed chip"; }
+		}
+
+		public static Chip Create()
+		{
+			var chip = new Chip();
+
+			// Create the VCC and ground pins
+			// These pins are always added
+			// TODO: add something to "hide" these pins on the outside of a ChipInstance
+
+			var vccPin = chip.AddPin(out chip.vccPinHandle);
+			vccPin.transform.position = new Vector2(0.0f, 2.0f);
+			vccPin.transform.rotation = Rotation.ROTATE_180;
+			vccPin.name = "VCC";
+
+			var groundPin = chip.AddPin(out chip.groundPinHandle);
+			groundPin.transform.position = new Vector2(0.0f, -2.0f);
+			groundPin.name = "GND";
+
+			return chip;
 		}
 
 	}

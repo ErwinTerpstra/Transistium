@@ -7,17 +7,17 @@ namespace Transistium.Design
 		public HandleList<Chip> chips;
 
 		public Handle<Chip> rootChipHandle;
-		
+
+		public Chip RootChip => chips[rootChipHandle]; 
+
 		public Project()
 		{
 			chips = new HandleList<Chip>();
-
-			CreateChip(out rootChipHandle);
 		}
 
 		public Chip CreateChip(out Handle<Chip> handle)
 		{
-			var chip = new Chip();
+			var chip = Chip.Create();
 
 			handle = chips.Add(chip);
 
@@ -50,10 +50,13 @@ namespace Transistium.Design
 
 		}
 
-		public Chip RootChip
+		public static Project Create()
 		{
-			get { return chips[rootChipHandle]; }
-		}
+			var project = new Project();
 
+			project.CreateChip(out project.rootChipHandle);
+
+			return project;
+		}
 	}
 }
