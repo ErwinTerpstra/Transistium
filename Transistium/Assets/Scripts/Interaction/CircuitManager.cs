@@ -39,6 +39,8 @@ namespace Transistium.Interaction
 		[SerializeField]
 		private Transform wireRoot = null;
 
+		private ProjectSerializer projectSerializer;
+
 		private Project project;
 
 		private Chip currentChip;
@@ -63,7 +65,12 @@ namespace Transistium.Interaction
 			wires			= new Observer<Wire,			WireBehaviour>(CreateWire, DestroyWire);
 			pins			= new Observer<Pin,				PinBehaviour>(CreatePin, DestroyPin);
 
-			project = new Project();
+			projectSerializer = new ProjectSerializer();
+			project = projectSerializer.Load();
+
+			if (project == null)
+				project = Project.Create();
+
 			SwitchChip(project.chips[project.rootChipHandle]);
 		}
 
@@ -74,6 +81,11 @@ namespace Transistium.Interaction
 			junctions.DetectChanges();
 			wires.DetectChanges();
 			pins.DetectChanges();
+		}
+
+		public void StoreProject()
+		{
+			projectSerializer.Store(project);
 		}
 
 		public void SwitchChip(Chip chip)

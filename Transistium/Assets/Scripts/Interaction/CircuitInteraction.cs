@@ -17,9 +17,6 @@ namespace Transistium.Interaction
 		public event CircuitElementEvent SelectionChanged;
 
 		[SerializeField]
-		private Transform selectionIndicator = null;
-
-		[SerializeField]
 		private float gridSize = 0.2f;
 
 		private CircuitManager circuitManager;
@@ -37,8 +34,6 @@ namespace Transistium.Interaction
 			base.Awake();
 
 			currentWire = null;
-
-			selectionIndicator.gameObject.SetActive(false);
 		}
 
 		private void Start()
@@ -53,15 +48,7 @@ namespace Transistium.Interaction
 		private void Update()
 		{
 			if (selectedElement != null)
-			{
-				// Update the position of the selection indicator
-				selectionIndicator.localPosition = selectedElement.Element.transform.position;
-				selectionIndicator.gameObject.SetActive(true);
-
 				HandleSelectedElementShortcuts();
-			}
-			else
-				selectionIndicator.gameObject.SetActive(false);
 		}
 
 
@@ -107,7 +94,13 @@ namespace Transistium.Interaction
 
 		private void Select(CircuitElementBehaviour elementBehaviour)
 		{
+			if (selectedElement && selectedElement.SelectionIndicator)
+				selectedElement.SelectionIndicator.SetActive(false);
+
 			selectedElement = elementBehaviour;
+
+			if (selectedElement && selectedElement.SelectionIndicator)
+				selectedElement.SelectionIndicator.SetActive(true);
 
 			SelectionChanged?.Invoke(elementBehaviour?.Element);
 		}
