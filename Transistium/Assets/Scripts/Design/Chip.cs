@@ -62,6 +62,11 @@ namespace Transistium.Design
 			pins.Remove(pinHandle);
 		}
 
+		public bool ShouldInstantiatePin(Handle<Pin> pinHandle)
+		{
+			return pinHandle != vccPinHandle && pinHandle != groundPinHandle;
+		}
+
 		public string NameOrDefault
 		{
 			get { return name ?? "Unnamed chip"; }

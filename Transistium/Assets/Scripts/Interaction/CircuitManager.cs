@@ -78,10 +78,12 @@ namespace Transistium.Interaction
 
 		public void SwitchChip(Chip chip)
 		{
-			if (this.currentChip != null)
-				ChipLeft?.Invoke(chip);
+			if (currentChip != null)
+				ChipLeft?.Invoke(currentChip);
 
-			this.currentChip = chip;
+			currentChip = chip;
+
+			project.UpdateChipInstances();
 
 			chipInstances.Observe(chip.circuit.chipInstances);
 			transistors.Observe(chip.circuit.transistors);

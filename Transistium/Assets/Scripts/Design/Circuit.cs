@@ -70,20 +70,30 @@ namespace Transistium.Design
 
 			foreach (var pin in chip.pins)
 			{
-				var pinInstance = new PinInstance()
-				{
-					pinHandle = chip.pins.LookupHandle(pin),
-					flags = CircuitElementFlags.EMBEDDED,
-				};
+				if (!chip.ShouldInstantiatePin(chip.pins.LookupHandle(pin)))
+					continue;
 
-				AddJunction(CircuitElementFlags.EMBEDDED, out pinInstance.junctionHandle);
-
-				chipInstance.pins.Add(pinInstance);
+				InstantiatePin(pin, chip, chipInstance);
 			}
 
 			chipInstances.Add(chipInstance);
 
 			return chipInstance;
+		}
+
+		public PinInstance InstantiatePin(Pin pin, Chip chip, ChipInstance chipInstance)
+		{
+			var pinInstance = new PinInstance()
+			{
+				pinHandle = chip.pins.LookupHandle(pin),
+				flags = CircuitElementFlags.EMBEDDED,
+			};
+
+			AddJunction(CircuitElementFlags.EMBEDDED, out pinInstance.junctionHandle);
+
+			chipInstance.pins.Add(pinInstance);
+
+			return pinInstance;
 		}
 		
 		public void RemoveTransistor(Transistor transistor)
@@ -132,7 +142,22 @@ namespace Transistium.Design
 
 			wires.Remove(wire);
 		}
-		
+
+		public void RemoveChipInstance(ChipInstance chipInstance)
+		{
+			for (int i = chipInstance.pins.Count - 1; i >= 0; --i)
+				RemovePinInstance(chipInstance, chipInstance.pins[i]);
+
+			chipInstances.Remove(chipInstance);
+		}
+
+		public void RemovePinInstance(ChipInstance chipInstance, PinInstance pinInstance)
+		{
+			RemoveJunction(pinInstance.junctionHandle);
+
+			chipInstance.pins.Remove(pinInstance);
+		}
+
 		public bool AreConnected(Junction a, Junction b)
 		{
 			var ha = junctions.LookupHandle(a);

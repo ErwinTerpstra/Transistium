@@ -74,10 +74,16 @@ namespace Transistium.Interaction
 					// Deduce what kind of element was selected
 					var transistorBehaviour = selectedElement.GetComponent<TransistorBehaviour>();
 					var junctionBehaviour = selectedElement.GetComponent<JunctionBehaviour>();
+					var pinBehaviour = selectedElement.GetComponent<PinBehaviour>(); ;
+					var chipInstanceBehaviour = selectedElement.GetComponent<ChipInstanceBehaviour>();
 
 					// Remove from circuit accordingly
 					if (transistorBehaviour != null)
 						circuit.RemoveTransistor(transistorBehaviour.Transistor);
+					else if (pinBehaviour != null)
+						circuitManager.CurrentChip.RemovePin(pinBehaviour.Pin);
+					else if (chipInstanceBehaviour != null)
+						circuit.RemoveChipInstance(chipInstanceBehaviour.ChipInstance);
 					else if (junctionBehaviour != null)
 						circuit.RemoveJunction(junctionBehaviour.Junction);
 
