@@ -143,15 +143,19 @@ namespace Transistium.Interaction
 
 		private void HandleLeftClick(PointerEventData eventData)
 		{
-			var wireBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<WireBehaviour>();
+			var target = eventData.pointerCurrentRaycast.gameObject;
+			var wireBehaviours = GetComponentsInChildren<WireBehaviour>();
 
-			if (wireBehaviour != null)
+			foreach (var wireBehaviour in wireBehaviours)
 			{
-				circuit.RemoveWire(wireBehaviour.Wire);
-				return;
+				if (wireBehaviour.OverlapsPoint(eventData.pointerCurrentRaycast.worldPosition))
+				{
+					circuit.RemoveWire(wireBehaviour.Wire);
+					return;
+				}
 			}
 
-			var elementBehaviour = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<CircuitElementBehaviour>();
+			var elementBehaviour = target.GetComponentInParent<CircuitElementBehaviour>();
 
 			if (elementBehaviour != null)
 			{

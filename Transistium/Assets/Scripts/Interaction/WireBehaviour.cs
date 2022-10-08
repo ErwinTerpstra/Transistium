@@ -50,6 +50,22 @@ namespace Transistium.Interaction
 			SetVerticesDirty();
 		}
 
+		public bool OverlapsPoint(Vector2 position)
+		{
+			position = transform.InverseTransformPoint(position);
+
+			for (int i = 0; i < pathBuffer.Count - 1; ++i)
+			{
+				Vector3 a = pathBuffer[i + 0];
+				Vector3 b = pathBuffer[i + 1];
+
+				if (VectorUtil.DistanceToLine(a, b, position, out _) < width)
+					return true;
+			}
+
+			return false;
+		}
+
 		private void UpdatePathBuffer()
 		{
 			if (wire == null)
@@ -58,13 +74,18 @@ namespace Transistium.Interaction
 			pathBuffer.Clear();
 
 			if (wire.a != Handle<Junction>.Invalid)
-				pathBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.a));
+				AddPathNode(CircuitManager.Instance.GetJunctionPosition(wire.a));
 
 			foreach (var vertex in wire.vertices)
-				pathBuffer.Add(CircuitManager.Instance.GetWorldPosition(vertex));
+				AddPathNode(CircuitManager.Instance.GetWorldPosition(vertex));
 
 			if (wire.b != Handle<Junction>.Invalid)
-				pathBuffer.Add(CircuitManager.Instance.GetJunctionPosition(wire.b));
+				AddPathNode(CircuitManager.Instance.GetJunctionPosition(wire.b));
+		}
+
+		private void AddPathNode(Vector3 position)
+		{
+			pathBuffer.Add(transform.InverseTransformPoint(position));
 		}
 
 		private void UpdateVertexBuffer()
@@ -77,14 +98,14 @@ namespace Transistium.Interaction
 				bool hasNext = i < (pathBuffer.Count - 1);
 
 				// Retrieve coordinates of the current vertex
-				Vector2 currentVertex = transform.InverseTransformPoint(pathBuffer[i]);
+				Vector2 currentVertex = pathBuffer[i];
 
 				// Calculate a smoothed tangent vector to create a line with non-zero width
 				Vector2 forward = Vector2.zero;
 
 				if (hasPrevious)
 				{
-					Vector2 previousVertex = transform.InverseTransformPoint(pathBuffer[i - 1]);
+					Vector2 previousVertex = pathBuffer[i - 1];
 
 					Vector2 previousToCurrent = (currentVertex - previousVertex).normalized;
 					forward += previousToCurrent;
@@ -92,7 +113,7 @@ namespace Transistium.Interaction
 
 				if (hasNext)
 				{
-					Vector2 nextVertex = transform.InverseTransformPoint(pathBuffer[i + 1]);
+					Vector2 nextVertex = pathBuffer[i + 1];
 
 					Vector2 currentToNext = (nextVertex - currentVertex).normalized;
 					forward += currentToNext;

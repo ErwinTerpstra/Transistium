@@ -22,5 +22,18 @@ namespace Transistium
 			return (a.x * b.y) - (a.y * b.x);
 		}
 
+		public static float DistanceToLine(Vector2 a, Vector2 b, Vector2 p, out Vector2 pointOnLine)
+		{
+			Vector2 ab = b - a;
+			Vector2 ap = p - a;
+
+			Vector2 direction = ab.normalized;
+
+			float dot = Vector3.Dot(direction, ap);
+			pointOnLine = a + direction * dot;
+
+			return Vector2.Distance(pointOnLine, p);
+		}
+
 	}
 }
