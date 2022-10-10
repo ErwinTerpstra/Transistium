@@ -72,14 +72,18 @@ namespace Transistium.Design
 			}
 
 			// Iterate all pin instances currently present in the parent chip
-			for (int i = chipInstance.pins.Count - 1; i >= 0; --i)
+			for (int i = 0; i < chipInstance.pins.Count; )
 			{
 				var pinInstance = chipInstance.pins[i];
 				var pin = childChip.pins[pinInstance.pinHandle];
 
+				pinInstance.transform.rotation = pin.side.ToRotation();
+
 				// Check if this pin instance should be deleted
 				if (!childChip.pins.Contains(pin))
 					parentChip.circuit.RemovePinInstance(chipInstance, pinInstance);
+				else
+					++i;
 			}
 		}
 
@@ -87,7 +91,8 @@ namespace Transistium.Design
 		{
 			var project = new Project();
 
-			project.CreateChip(out project.rootChipHandle);
+			var rootChip = project.CreateChip(out project.rootChipHandle);
+			rootChip.name = "Root";
 
 			return project;
 		}

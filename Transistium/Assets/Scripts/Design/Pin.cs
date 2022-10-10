@@ -17,10 +17,8 @@ namespace Transistium.Design
 
 		public Handle<Junction> junctionHandle;
 
-		public string NameOrDefault
-		{
-			get { return name ?? "???"; }
-		}
+		public string NameOrDefault => name ?? "???";
+		
 	}
 
 	public static class PinExtensions

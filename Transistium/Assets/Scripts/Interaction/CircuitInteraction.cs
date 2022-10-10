@@ -19,6 +19,20 @@ namespace Transistium.Interaction
 		[SerializeField]
 		private float gridSize = 0.2f;
 
+		[SerializeField]
+		private float zoomSpeed = 10.0f;
+
+		[SerializeField]
+		private float defaultZoomSize = 10.0f;
+
+		[SerializeField]
+		private float minZoomSize = 1.0f;
+
+		[SerializeField]
+		private float maxZoomSize = 20.0f;
+
+		private Camera worldCamera;
+
 		private CircuitManager circuitManager;
 
 		private Circuit circuit;
@@ -29,11 +43,17 @@ namespace Transistium.Interaction
 
 		private Wire currentWire;
 
+		private Vector2 cameraStartPosition;
+
+		public CircuitElement SelectedElement => selectedElement?.Element;
+
 		protected override void Awake()
 		{
 			base.Awake();
 
 			currentWire = null;
+
+			worldCamera = Camera.main;
 		}
 
 		private void Start()
@@ -49,8 +69,19 @@ namespace Transistium.Interaction
 		{
 			if (selectedElement != null)
 				HandleSelectedElementShortcuts();
+
+			HandleZoom();
 		}
 
+		private void SetCameraPosition(Vector2 position)
+		{
+			worldCamera.transform.position = new Vector3(position.x, position.y, worldCamera.transform.position.z);
+		}
+
+		private void SetCameraZoom(float size)
+		{
+			worldCamera.orthographicSize = Mathf.Clamp(size, minZoomSize, maxZoomSize);
+		}
 
 		private void HandleSelectedElementShortcuts()
 		{
@@ -90,6 +121,14 @@ namespace Transistium.Interaction
 			else if (Input.GetKeyDown(KeyCode.LeftArrow))
 				selectedElement.Element.transform.rotation = rotations[(rotations.Length + Array.IndexOf(rotations, selectedElement.Element.transform.rotation) - 1) % rotations.Length];
 
+		}
+
+		private void HandleZoom()
+		{
+			float size = worldCamera.orthographicSize;
+			size -= Input.mouseScrollDelta.y * zoomSpeed;
+
+			SetCameraZoom(size);
 		}
 
 		private void Select(CircuitElementBehaviour elementBehaviour)
@@ -144,16 +183,6 @@ namespace Transistium.Interaction
 		private void HandleLeftClick(PointerEventData eventData)
 		{
 			var target = eventData.pointerCurrentRaycast.gameObject;
-			var wireBehaviours = GetComponentsInChildren<WireBehaviour>();
-
-			foreach (var wireBehaviour in wireBehaviours)
-			{
-				if (wireBehaviour.OverlapsPoint(eventData.pointerCurrentRaycast.worldPosition))
-				{
-					circuit.RemoveWire(wireBehaviour.Wire);
-					return;
-				}
-			}
 
 			var elementBehaviour = target.GetComponentInParent<CircuitElementBehaviour>();
 
@@ -168,10 +197,23 @@ namespace Transistium.Interaction
 				}
 
 				Select(elementBehaviour);
-				return;
 			}
+			else
+			{
+				Select(null);
 
-			Select(null);
+				// Check if we clicked a wire
+				var wireBehaviours = GetComponentsInChildren<WireBehaviour>();
+
+				foreach (var wireBehaviour in wireBehaviours)
+				{
+					if (wireBehaviour.OverlapsPoint(eventData.pointerCurrentRaycast.worldPosition))
+					{
+						circuit.RemoveWire(wireBehaviour.Wire);
+						return;
+					}
+				}
+			}
 		}
 
 		private void HandleRightClick(PointerEventData eventData)
@@ -236,6 +278,10 @@ namespace Transistium.Interaction
 					}
 
 					break;
+
+				case PointerEventData.InputButton.Right:
+					cameraStartPosition = worldCamera.transform.position;
+					break;
 			}
 
 		}
@@ -273,16 +319,32 @@ namespace Transistium.Interaction
 
 		public void OnDrag(PointerEventData eventData)
 		{
-			if (currentWire != null)
+			switch (eventData.button)
 			{
-				UpdateWire(eventData);
-				return;
-			}
+				case PointerEventData.InputButton.Left:
+					if (currentWire != null)
+					{
+						UpdateWire(eventData);
+						break;
+					}
 
-			if (draggingElement != null)
-			{
-				UpdateElement(eventData);
-				return;
+					if (draggingElement != null)
+					{
+						UpdateElement(eventData);
+						break;
+					}
+
+					break;
+
+				case PointerEventData.InputButton.Right:
+					Vector2 currentPosition = worldCamera.ScreenToWorldPoint(eventData.pointerCurrentRaycast.screenPosition);
+					Vector2 startPosition = worldCamera.ScreenToWorldPoint(eventData.pointerPressRaycast.screenPosition);
+
+					Vector2 pointerDelta = currentPosition - startPosition;
+
+					SetCameraPosition(cameraStartPosition - pointerDelta);
+
+					break;
 			}
 		}
 
@@ -290,6 +352,9 @@ namespace Transistium.Interaction
 		private void OnChipEnterred(Chip chip)
 		{
 			circuit = chip.circuit;
+
+			SetCameraPosition(Vector2.zero);
+			SetCameraZoom(defaultZoomSize);
 		}
 
 		private void OnChipLeft(Chip chip)
@@ -297,10 +362,6 @@ namespace Transistium.Interaction
 
 		}
 
-		public CircuitElement SelectedElement
-		{
-			get { return selectedElement?.Element; }
-		}
 
 	}
 

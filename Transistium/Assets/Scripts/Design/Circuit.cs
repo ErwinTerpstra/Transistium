@@ -89,6 +89,8 @@ namespace Transistium.Design
 				flags = CircuitElementFlags.EMBEDDED,
 			};
 
+			pinInstance.transform.rotation = pin.side.ToRotation();
+
 			AddJunction(CircuitElementFlags.EMBEDDED, out pinInstance.junctionHandle);
 
 			chipInstance.pins.Add(pinInstance);

@@ -17,6 +17,12 @@ namespace Transistium.Interaction
 
 		private PinInstance pinInstance;
 
+		public Pin Pin => pin;
+
+		public PinInstance PinInstance => pinInstance;
+
+		public JunctionBehaviour Junction => junction;
+
 		private void LateUpdate()
 		{
 			if (pin != null)
@@ -28,11 +34,5 @@ namespace Transistium.Interaction
 			this.pin = pin;
 			this.pinInstance = pinInstance;
 		}
-
-		public Pin Pin => pin;
-
-		public PinInstance PinInstance => pinInstance;
-
-		public JunctionBehaviour Junction => junction;
 	}
 }

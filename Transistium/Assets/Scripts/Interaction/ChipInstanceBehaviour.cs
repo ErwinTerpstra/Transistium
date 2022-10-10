@@ -5,6 +5,7 @@ using UnityEngine;
 
 using Transistium.Design;
 using Transistium.Util;
+using UnityEngine.UI;
 
 namespace Transistium.Interaction
 {
@@ -19,10 +20,13 @@ namespace Transistium.Interaction
 		private PinInstanceBehaviour pinInstancePrefab = null;
 
 		[SerializeField]
-		private Transform[] pinInstanceRoots = null;
+		private LayoutGroup[] pinInstanceRoots = null;
 
 		[SerializeField]
 		private TMPro.TMP_Text label = null;
+
+		[SerializeField]
+		private int pinGroupPadding = 45;
 
 		private Chip chip;
 
@@ -37,6 +41,8 @@ namespace Transistium.Interaction
 		private void Awake()
 		{
 			pinInstances = new Observer<PinInstance, PinInstanceBehaviour>(CreatePinInstanceBehaviour, DestroyPinInstanceBehaviour);
+
+			UpdatePinLayouts();
 		}
 
 		private void LateUpdate()
@@ -60,11 +66,13 @@ namespace Transistium.Interaction
 			var root = pinInstanceRoots[(int)pin.side];
 
 			// Setup pin instance
-			PinInstanceBehaviour behaviour = Instantiate(pinInstancePrefab, root, false);
+			PinInstanceBehaviour behaviour = Instantiate(pinInstancePrefab, root.transform, false);
 			behaviour.Configure(pin, pinInstance);
 
 			CircuitElementBehaviour elementBehaviour = behaviour.GetComponent<CircuitElementBehaviour>();
 			elementBehaviour.Element = pinInstance;
+
+			UpdatePinLayouts();
 
 			PinInstanceCreated?.Invoke(pinInstance, behaviour);
 
@@ -75,7 +83,35 @@ namespace Transistium.Interaction
 		{
 			Destroy(behaviour.gameObject);
 
+			UpdatePinLayouts();
+
 			PinInstanceDestroyed?.Invoke(pinInstance, behaviour);
+		}
+
+		private void UpdatePinLayouts()
+		{
+			UpdatePinLayout(pinInstanceRoots[(int) PinSide.TOP], true);
+			UpdatePinLayout(pinInstanceRoots[(int) PinSide.BOTTOM], true);
+
+			UpdatePinLayout(pinInstanceRoots[(int) PinSide.LEFT], false);
+			UpdatePinLayout(pinInstanceRoots[(int) PinSide.RIGHT], false);
+		}
+
+		private void UpdatePinLayout(LayoutGroup group, bool horizontal)
+		{
+			RectOffset offset = group.padding;
+			int padding = group.transform.childCount > 0 ? pinGroupPadding : 0;
+
+			if (horizontal)
+			{
+				group.padding.left = padding;
+				group.padding.right = padding;
+			}
+			else
+			{
+				group.padding.top = padding;
+				group.padding.bottom = padding;
+			}
 		}
 	}
 

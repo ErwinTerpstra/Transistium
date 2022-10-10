@@ -20,6 +20,8 @@ namespace Transistium.Util
 
 		private List<Key> removedKeys;
 
+		public OneToOneMapping<Key, Value> Mapping => mapping;
+
 		public Observer(CreateValueHandler createHandler, DestroyValueHandler destroyHandler)
 		{
 			this.createHandler = createHandler;
@@ -80,11 +82,6 @@ namespace Transistium.Util
 
 				destroyHandler(key, value);
 			}
-		}
-
-		public OneToOneMapping<Key, Value> Mapping
-		{
-			get { return mapping; }
 		}
 
 	}

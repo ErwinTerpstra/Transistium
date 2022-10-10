@@ -68,12 +68,12 @@ namespace Transistium.Design
 			// TODO: add something to "hide" these pins on the outside of a ChipInstance
 
 			var vccPin = chip.AddPin(out chip.vccPinHandle);
-			vccPin.transform.position = new Vector2(0.0f, 2.0f);
+			vccPin.transform.position = new Vector2(0.0f, 100.0f);
 			vccPin.transform.rotation = Rotation.ROTATE_180;
 			vccPin.name = "VCC";
 
 			var groundPin = chip.AddPin(out chip.groundPinHandle);
-			groundPin.transform.position = new Vector2(0.0f, -2.0f);
+			groundPin.transform.position = new Vector2(0.0f, -100.0f);
 			groundPin.name = "GND";
 
 			return chip;
