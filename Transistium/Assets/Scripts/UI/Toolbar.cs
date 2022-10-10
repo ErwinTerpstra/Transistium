@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using Transistium.Interaction;
 using Transistium.Util;
 using Transistium.Design;
+using Random = UnityEngine.Random;
 
 namespace Transistium.UI
 {
@@ -79,7 +80,12 @@ namespace Transistium.UI
 
 		private void OnAddPinClicked()
 		{
-			circuitManager.CurrentChip.AddPin(out _);
+			var pin = circuitManager.CurrentChip.AddPin(out _);
+			pin.transform.position = new Vector2()
+			{
+				x = Random.Range(-20.0f, 20.0f),
+				y = Random.Range(-20.0f, 20.0f),
+			};
 		}
 
 		private void OnCreateChipClicked()
