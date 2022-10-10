@@ -31,7 +31,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8588432069732831885}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -53,8 +53,8 @@ MonoBehaviour:
   m_Padding:
     m_Left: 45
     m_Right: 45
-    m_Top: 0
-    m_Bottom: -45
+    m_Top: -20
+    m_Bottom: 0
   m_ChildAlignment: 4
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
@@ -135,11 +135,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: -45
-    m_Right: 0
-    m_Top: 45
-    m_Bottom: 45
-  m_ChildAlignment: 0
+    m_Left: 0
+    m_Right: -20
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
@@ -179,6 +179,7 @@ GameObject:
   - component: {fileID: 4017384525396706758}
   - component: {fileID: 3330004515472062481}
   - component: {fileID: 5291228721949480097}
+  - component: {fileID: 505426620402699844}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -199,7 +200,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6674925802132558430}
-  m_Father: {fileID: 1407315422435352304}
+  m_Father: {fileID: 8588432069732831885}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -245,6 +246,26 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &505426620402699844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483933922180666388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &3527454243445838168
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,7 +297,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8588432069732831885}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -298,8 +319,8 @@ MonoBehaviour:
   m_Padding:
     m_Left: 45
     m_Right: 45
-    m_Top: -45
-    m_Bottom: 0
+    m_Top: 0
+    m_Bottom: -20
   m_ChildAlignment: 4
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
@@ -362,7 +383,7 @@ RectTransform:
   - {fileID: 1407315422435352304}
   - {fileID: 9029860932459159972}
   m_Father: {fileID: 8588432069732831885}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -576,6 +597,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 4017384525396706758}
   - {fileID: 4106928807568959283}
   - {fileID: 5485440739641725181}
   - {fileID: 8803313330187420319}
@@ -643,7 +665,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4017384525396706758}
   - {fileID: 6315845190413319737}
   m_Father: {fileID: 5485440739641725181}
   m_RootOrder: 1
@@ -745,11 +766,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
-    m_Right: -45
-    m_Top: 45
-    m_Bottom: 45
-  m_ChildAlignment: 3
+    m_Left: -20
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
@@ -1012,7 +1033,7 @@ PrefabInstance:
     - target: {fileID: 959053095470696130, guid: 01dbe46c03c959a4ab5983f85d47f51a,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 959053095470696130, guid: 01dbe46c03c959a4ab5983f85d47f51a,
         type: 3}
