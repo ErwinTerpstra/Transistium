@@ -1,0 +1,17 @@
+{
+    "name": "Transistium.Design",
+    "rootNamespace": "",
+    "references": [
+        "GUID:355dfc2c1d47baf4a88c0474fe582b97",
+        "GUID:e9f8f862b2c49534aae901e2ff447270"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

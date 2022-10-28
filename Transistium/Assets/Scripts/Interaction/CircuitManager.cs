@@ -5,6 +5,8 @@ using UnityEngine;
 
 using Transistium.Design;
 using Transistium.Util;
+using Transistium.Interaction.Components;
+using Guid = Transistium.Guid;
 
 namespace Transistium.Interaction
 {
@@ -21,6 +23,16 @@ namespace Transistium.Interaction
 		public PinBehaviour pin;
 
 		public ChipInstanceBehaviour chipInstance;
+
+		public ComponentPrefab[] components;
+	}
+
+	[Serializable]
+	public class ComponentPrefab
+	{
+		public string componentID;
+
+		public ComponentBehaviour prefab;
 	}
 
 	public delegate void ChipEvent(Chip chip);
@@ -55,6 +67,12 @@ namespace Transistium.Interaction
 
 		private Observer<ChipInstance, ChipInstanceBehaviour> chipInstances;
 
+		public Project Project => project;
+
+		public Chip CurrentChip => currentChip;
+
+		public Circuit CurrentCircuit => currentChip?.circuit;
+
 		protected override void Awake()
 		{
 			base.Awake();
@@ -71,7 +89,7 @@ namespace Transistium.Interaction
 			if (project == null)
 				project = Project.Create();
 
-			SwitchChip(project.chips[project.rootChipHandle]);
+			SwitchChip(project.RootChip);
 		}
 
 		private void Update()
@@ -140,10 +158,40 @@ namespace Transistium.Interaction
 
 			junctions.Mapping.Map(junction, junctionBehaviour);
 		}
+
+		private ComponentBehaviour GetComponentPrefab(Guid guid)
+		{
+			foreach (var componentPrefab in prefabs.components)
+			{
+				Guid componentGuid = Guid.Hash(componentPrefab.componentID);
+				if (componentGuid == guid)
+					return componentPrefab.prefab;
+			}
+
+			return null;
+		}
 		
 		private ChipInstanceBehaviour CreateChipInstance(ChipInstance chipInstance)
 		{
-			var chip = project.chips[chipInstance.chipHandle];
+			// Check if this chip instance is for a built-in component
+			var component = project.componentLibrary.FindComponent(chipInstance.chipHandle.guid);
+
+			Chip chip;
+			ChipInstanceBehaviour prefab;
+
+			// If it is for a component, retrieve the chip and prefab to instantiate
+			if (component != null)
+			{
+				chip = component.Chip;
+				
+				var componentPrefab = GetComponentPrefab(component.Guid);
+				prefab = componentPrefab.GetComponent<ChipInstanceBehaviour>();
+			}
+			else
+			{
+				chip = project.GetChip(chipInstance.chipHandle);
+				prefab = prefabs.chipInstance;
+			}
 
 			// Instantiate the behaviour
 			ChipInstanceBehaviour chipInstanceBehaviour = Instantiate(prefabs.chipInstance, elementRoot, false);
@@ -249,16 +297,6 @@ namespace Transistium.Interaction
 		private void OnPinInstanceDestroyed(PinInstance pinInstance, PinInstanceBehaviour behaviour)
 		{
 
-		}
-
-		public Project Project
-		{
-			get { return project; }
-		}
-
-		public Chip CurrentChip
-		{
-			get { return currentChip; }
 		}
 	}
 

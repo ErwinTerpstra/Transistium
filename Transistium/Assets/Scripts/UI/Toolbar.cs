@@ -7,10 +7,22 @@ using UnityEngine.UI;
 using Transistium.Interaction;
 using Transistium.Util;
 using Transistium.Design;
+using System.Linq;
+
 using Random = UnityEngine.Random;
+using Component = Transistium.Design.Components.Component;
 
 namespace Transistium.UI
 {
+	public struct ToolbarElement
+	{
+		public Chip chip;
+
+		public Handle<Chip> chipHandle;
+
+		public Component component;
+	}
+
 	public class Toolbar : MonoBehaviour
 	{
 		[SerializeField]
@@ -33,14 +45,23 @@ namespace Transistium.UI
 
 		private CircuitManager circuitManager;
 
-		private Observer<Chip, ChipButton> chips;
+		private Observer<ToolbarElement, ChipButton> elements;
 
 		private void Start()
 		{
 			circuitManager = CircuitManager.Instance;
 
-			chips = new Observer<Chip, ChipButton>(CreateChip, DestroyChip);
-			chips.Observe(circuitManager.Project.chips);
+			var project = circuitManager.Project;
+
+			var options = project.AllChips.Select(handle => new ToolbarElement()
+			{
+				chip = project.GetChip(handle),
+				chipHandle = handle,
+				component = project.componentLibrary.FindComponent(handle)
+			});
+
+			elements = new Observer<ToolbarElement, ChipButton>(CreateOptionButton, DestroyOptionButton);
+			elements.Observe(options);
 
 			buttonAddTransistor.onClick.AddListener(OnAddTransistorClicked);
 			buttonAddPin.onClick.AddListener(OnAddPinClicked);
@@ -52,22 +73,22 @@ namespace Transistium.UI
 
 		private void LateUpdate()
 		{
-			chips.DetectChanges();
+			elements.DetectChanges();
 		}
 
-		private ChipButton CreateChip(Chip chip)
+		private ChipButton CreateOptionButton(ToolbarElement option)
 		{
 			var chipButton = Instantiate(chipButtonPrefab, chipRoot, false);
 
-			chipButton.Configure(chip);
+			chipButton.Configure(option.chip, option.component == null);
 
-			chipButton.AddClicked += OnChipAddClicked;
+			chipButton.AddClicked += OnChipInstantiateClicked;
 			chipButton.EditClicked += OnChipEditClicked;
 
 			return chipButton;
 		}
 
-		private void DestroyChip(Chip chip, ChipButton chipButton)
+		private void DestroyOptionButton(ToolbarElement option, ChipButton chipButton)
 		{
 			Destroy(chipButton.gameObject);
 		}
@@ -75,7 +96,7 @@ namespace Transistium.UI
 
 		private void OnAddTransistorClicked()
 		{
-			circuitManager.CurrentChip.circuit.AddTransistor(out _);
+			circuitManager.CurrentCircuit.AddTransistor(out _);
 		}
 
 		private void OnAddPinClicked()
@@ -94,25 +115,28 @@ namespace Transistium.UI
 			circuitManager.SwitchChip(chip);
 		}
 
-		private void OnChipAddClicked(ChipButton button)
+		private void OnChipInstantiateClicked(ChipButton button)
 		{
-			var chip = chips.Mapping[button];
+			var element = elements.Mapping[button];
 			var project = circuitManager.Project;
 
-			if (project.DetectCircularReferences(chip, circuitManager.CurrentChip))
+			if (project.DetectCircularReferences(element.chip, circuitManager.CurrentChip))
 			{
 				Debug.LogWarning("Prevented instantiating chip that would result in a circular reference!");
 				return;
 			}
 
-			circuitManager.CurrentChip.circuit.InstantiateChip(chip, project.chips.LookupHandle(chip));
-
+			circuitManager.CurrentChip.circuit.InstantiateChip(element.chip, element.chipHandle);
 		}
 
 		private void OnChipEditClicked(ChipButton button)
 		{
-			var chip = chips.Mapping[button];
-			circuitManager.SwitchChip(chip);
+			var element = elements.Mapping[button];
+
+			if (element.component != null)
+				return;
+
+			circuitManager.SwitchChip(element.chip);
 		}
 
 		private void OnSaveProjectClicked()

@@ -1,0 +1,20 @@
+{
+    "name": "Transistium.UI",
+    "rootNamespace": "",
+    "references": [
+        "GUID:355dfc2c1d47baf4a88c0474fe582b97",
+        "GUID:e9f8f862b2c49534aae901e2ff447270",
+        "GUID:d5a7bde266d87fa4cb8f109ada1adfac",
+        "GUID:5a8585df5c968a645b67b81a6e61d034",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

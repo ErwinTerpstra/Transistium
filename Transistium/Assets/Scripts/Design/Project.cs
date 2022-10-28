@@ -1,19 +1,37 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using Transistium.Design.Components;
+using Newtonsoft.Json;
 
 namespace Transistium.Design
 {
 	public class Project
 	{
-		public HandleList<Chip> chips;
+		[JsonIgnore]
+		public readonly ComponentLibrary componentLibrary;
 
-		public Handle<Chip> rootChipHandle;
+		[JsonProperty]
+		private HandleList<Chip> chips;
 
-		public Chip RootChip => chips[rootChipHandle]; 
+		[JsonProperty]
+		private Handle<Chip> rootChipHandle;
+
+		public Chip RootChip => chips[rootChipHandle];
+
+		public IEnumerable<Handle<Chip>> AllChips => 
+			chips.AllHandles.Union(
+				componentLibrary.AllChips
+			);
 
 		public Project()
 		{
-			chips = new HandleList<Chip>();
+			chips = new HandleList<Chip>((byte)ElementType.CHIP);
+			componentLibrary = ComponentLibrary.Default;
+		}
+
+		public Project(ComponentLibrary componentLibrary) : this()
+		{
+			this.componentLibrary = componentLibrary;
 		}
 
 		public Chip CreateChip(out Handle<Chip> handle)
@@ -25,6 +43,16 @@ namespace Transistium.Design
 			return chip;
 		}
 
+		public Chip GetChip(Handle<Chip> handle)
+		{
+			return componentLibrary.FindChip(handle) ?? chips[handle];
+		}
+
+		public Handle<Chip> LookupChipHandle(Chip chip)
+		{
+			return chips.LookupHandle(chip);
+		}
+
 		public bool DetectCircularReferences(Chip haystack, Chip needle)
 		{
 			if (haystack == needle)
@@ -32,7 +60,7 @@ namespace Transistium.Design
 
 			foreach (var instance in haystack.circuit.chipInstances)
 			{
-				var chip = chips[instance.chipHandle];
+				var chip = GetChip(instance.chipHandle);
 
 				if (DetectCircularReferences(chip, needle))
 					return true;
@@ -55,7 +83,7 @@ namespace Transistium.Design
 
 		public void UpdateChipInstance(Chip parentChip, ChipInstance chipInstance)
 		{
-			var childChip = chips[chipInstance.chipHandle];
+			var childChip = GetChip(chipInstance.chipHandle);
 
 			// Iterate all pins in the child chip
 			foreach (var pin in childChip.pins)
@@ -89,7 +117,7 @@ namespace Transistium.Design
 
 		public static Project Create()
 		{
-			var project = new Project();
+			var project = new Project(ComponentLibrary.Default);
 
 			var rootChip = project.CreateChip(out project.rootChipHandle);
 			rootChip.name = "Root";

@@ -1,0 +1,16 @@
+{
+    "name": "Transistium.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:355dfc2c1d47baf4a88c0474fe582b97"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

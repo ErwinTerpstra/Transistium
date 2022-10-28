@@ -4,9 +4,9 @@ namespace Transistium.Runtime
 	[System.Flags]
 	public enum WireState
 	{
-		UNKNOWN = 0,
-		PULLED_LOW = 1,
-		PULLED_HIGH = 2,
+		FLOATING = 0,
+		LOW = 1,
+		HIGH = 2,
 	}
 
 	public struct Wire
@@ -18,7 +18,7 @@ namespace Transistium.Runtime
 			get
 			{
 				// Since state are bit flags, this returns false the case where the wire is both pulled high and pulled low
-				return state == WireState.PULLED_HIGH;
+				return state == WireState.HIGH;
 			}
 		}
 	}

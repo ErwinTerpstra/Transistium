@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 
 using UnityEngine;
+using Transistium.Design.Components;
 
 namespace Transistium.Design
 {
@@ -50,7 +51,9 @@ namespace Transistium.Design
 			TextReader textReader = new StreamReader(new FileStream(projectFile, FileMode.Open));
 			JsonReader jsonReader = new JsonTextReader(textReader);
 
-			return serializer.Deserialize<Project>(jsonReader);
+			Project project = serializer.Deserialize<Project>(jsonReader);
+
+			return project;
 		}
 	}
 }

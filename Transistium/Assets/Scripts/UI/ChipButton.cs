@@ -37,9 +37,11 @@ namespace Transistium.UI
 			UpdateName();
 		}
 
-		public void Configure(Chip chip)
+		public void Configure(Chip chip, bool canEdit)
 		{
 			this.chip = chip;
+
+			buttonEdit.interactable = canEdit;
 
 			UpdateName();
 		}

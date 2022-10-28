@@ -62,7 +62,7 @@ namespace Transistium.Interaction
 			circuitManager.ChipEnterred += OnChipEnterred;
 			circuitManager.ChipLeft += OnChipLeft;
 
-			circuit = circuitManager.CurrentChip.circuit;
+			circuit = circuitManager.CurrentCircuit;
 		}
 
 		private void Update()

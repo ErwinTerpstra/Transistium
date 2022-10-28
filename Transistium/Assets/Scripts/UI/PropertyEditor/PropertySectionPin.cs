@@ -15,10 +15,14 @@ namespace Transistium.UI
 		[SerializeField]
 		private TMPro.TMP_Dropdown sideDropdown = null;
 
+		[SerializeField]
+		private TMPro.TMP_Dropdown directionDropdown = null;
+
 		private void Awake()
 		{
 			inputFieldName.onValueChanged.AddListener(OnNameChanged);
 			sideDropdown.onValueChanged.AddListener(OnSideChanged);
+			directionDropdown.onValueChanged.AddListener(OnDirectionChanged);
 		}
 
 		public override void Show(Pin element)
@@ -27,6 +31,7 @@ namespace Transistium.UI
 
 			inputFieldName.text = element.name ?? string.Empty;
 			sideDropdown.value = (int)element.side;
+			directionDropdown.value = (int)element.direction;
 		}
 
 		private void OnNameChanged(string name)
@@ -37,6 +42,11 @@ namespace Transistium.UI
 		private void OnSideChanged(int side)
 		{
 			element.side = (PinSide)side;
+		}
+
+		private void OnDirectionChanged(int direction)
+		{
+			element.direction = (PinDirection)direction;
 		}
 	}
 
