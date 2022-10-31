@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using Transistium.Interaction;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,20 +14,49 @@ namespace Transistium.UI
         [SerializeField]
         private Button pauseButton = null;
 
-		private void Awake()
+        [SerializeField]
+        private Button stopButton = null;
+
+        private TransistiumApplication application;
+
+        private void Awake()
 		{
+            application = FindObjectOfType<TransistiumApplication>();
+
             playButton.onClick.AddListener(OnPlayClicked);
             pauseButton.onClick.AddListener(OnPauseClicked);
+            stopButton.onClick.AddListener(OnStopButton);
+        }
+
+		private void Start()
+		{
+            UpdateButtons();
+		}
+
+		private void UpdateButtons()
+		{
+            var state = application.State;
+            
+            playButton.gameObject.SetActive(state == ApplicationState.DESIGNING || state == ApplicationState.SIMULATING);
+            pauseButton.gameObject.SetActive(state == ApplicationState.SIMULATING);
+            stopButton.gameObject.SetActive(state == ApplicationState.SIMULATING || state == ApplicationState.PAUSED);
 		}
 
         private void OnPlayClicked()
 		{
+            application.Play();
 
+            UpdateButtons();
 		}
 
         private void OnPauseClicked()
 		{
+            application.Pause();
+		}
 
+        private void OnStopButton()
+		{
+            application.Stop();
 		}
 
     }

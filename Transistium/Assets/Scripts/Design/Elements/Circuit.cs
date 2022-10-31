@@ -26,9 +26,9 @@ namespace Transistium.Design
 			var transistor = new Transistor();
 
 			var flags = CircuitElementFlags.EMBEDDED;
-			AddJunction(flags, out transistor.gate);
-			AddJunction(flags, out transistor.drain);
-			AddJunction(flags, out transistor.source);
+			AddJunction(flags, out transistor.@base);
+			AddJunction(flags, out transistor.collector);
+			AddJunction(flags, out transistor.emitter);
 
 			handle = transistors.Add(transistor);
 			
@@ -105,9 +105,9 @@ namespace Transistium.Design
 		
 		public void RemoveTransistor(Transistor transistor)
 		{
-			RemoveJunction(junctions[transistor.gate]);
-			RemoveJunction(junctions[transistor.drain]);
-			RemoveJunction(junctions[transistor.source]);
+			RemoveJunction(junctions[transistor.@base]);
+			RemoveJunction(junctions[transistor.collector]);
+			RemoveJunction(junctions[transistor.emitter]);
 
 			transistors.Remove(transistor);
 		}

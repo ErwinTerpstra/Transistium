@@ -33,6 +33,8 @@ namespace Transistium.Interaction
 
 		private Camera worldCamera;
 
+		private TransistiumApplication application;
+
 		private CircuitManager circuitManager;
 
 		private Circuit circuit;
@@ -54,11 +56,13 @@ namespace Transistium.Interaction
 			currentWire = null;
 
 			worldCamera = Camera.main;
+
+			application = FindObjectOfType<TransistiumApplication>();
+			circuitManager = FindObjectOfType<CircuitManager>();
 		}
 
 		private void Start()
 		{
-			circuitManager = CircuitManager.Instance;
 			circuitManager.ChipEnterred += OnChipEnterred;
 			circuitManager.ChipLeft += OnChipLeft;
 
@@ -67,7 +71,7 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
-			if (selectedElement != null)
+			if (selectedElement != null && application.State == ApplicationState.DESIGNING)
 				HandleSelectedElementShortcuts();
 
 			HandleZoom();
@@ -245,6 +249,9 @@ namespace Transistium.Interaction
 
 		public void OnBeginDrag(PointerEventData eventData)
 		{
+			if (application.State != ApplicationState.DESIGNING)
+				return;
+
 			switch (eventData.button)
 			{
 				case PointerEventData.InputButton.Left:

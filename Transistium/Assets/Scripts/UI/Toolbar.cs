@@ -43,13 +43,20 @@ namespace Transistium.UI
 		[SerializeField]
 		private ChipButton chipButtonPrefab = null;
 
+		private TransistiumApplication application;
+
 		private CircuitManager circuitManager;
+
+		private CanvasGroup canvasGroup;
 
 		private Observer<ToolbarElement, ChipButton> elements;
 
 		private void Start()
 		{
-			circuitManager = CircuitManager.Instance;
+			application = FindObjectOfType<TransistiumApplication>();
+			circuitManager = FindObjectOfType<CircuitManager>();
+
+			canvasGroup = GetComponent<CanvasGroup>();
 
 			var project = circuitManager.Project;
 
@@ -67,8 +74,9 @@ namespace Transistium.UI
 			buttonAddPin.onClick.AddListener(OnAddPinClicked);
 
 			buttonCreateChip.onClick.AddListener(OnCreateChipClicked);
-
 			buttonSaveProject.onClick.AddListener(OnSaveProjectClicked);
+
+			application.StateChanged += OnApplicationStateChanged;
 		}
 
 		private void LateUpdate()
@@ -142,6 +150,11 @@ namespace Transistium.UI
 		private void OnSaveProjectClicked()
 		{
 			circuitManager.StoreProject();
+		}
+
+		private void OnApplicationStateChanged(ApplicationState state)
+		{
+			canvasGroup.interactable = state == ApplicationState.DESIGNING;
 		}
 
 	}

@@ -16,7 +16,7 @@ namespace Transistium.Design
 		[JsonProperty]
 		private Handle<Chip> rootChipHandle;
 
-		public Chip RootChip => chips[rootChipHandle];
+		public Chip RootChip => GetChip(rootChipHandle);
 
 		public IEnumerable<Handle<Chip>> AllChips => 
 			chips.AllHandles.Union(

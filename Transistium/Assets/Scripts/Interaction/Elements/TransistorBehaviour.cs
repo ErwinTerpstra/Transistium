@@ -7,13 +7,13 @@ namespace Transistium.Interaction
 	public class TransistorBehaviour : MonoBehaviour
 	{
 		[SerializeField]
-		private JunctionBehaviour gate = null;
+		private JunctionBehaviour @base = null;
 
 		[SerializeField]
-		private JunctionBehaviour drain = null;
+		private JunctionBehaviour collector = null;
 
 		[SerializeField]
-		private JunctionBehaviour source = null;
+		private JunctionBehaviour emitter = null;
 
 		private Transistor transistor;
 
@@ -23,8 +23,8 @@ namespace Transistium.Interaction
 			set { transistor = value; }
 		}
 
-		public JunctionBehaviour Gate => gate;
-		public JunctionBehaviour Drain => drain;
-		public JunctionBehaviour Source => source;
+		public JunctionBehaviour Base => @base;
+		public JunctionBehaviour Collector => collector;
+		public JunctionBehaviour Emitter => emitter;
 	}
 }

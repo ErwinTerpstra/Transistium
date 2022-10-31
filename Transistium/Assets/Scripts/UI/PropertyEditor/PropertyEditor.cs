@@ -16,17 +16,26 @@ namespace Transistium.UI
 		[SerializeField]
 		private PropertySectionPin propertySectionPin = null;
 
+		private TransistiumApplication application;
+
 		private CircuitManager circuitManager;
 
 		private CircuitInteraction circuitInteraction;
-		
+
+		private CanvasGroup canvasGroup;
+
 		private void Start()
 		{
-			circuitManager = CircuitManager.Instance;
+			application = FindObjectOfType<TransistiumApplication>();
+			application.StateChanged += OnApplicationStateChanged;
+
+			circuitManager = FindObjectOfType<CircuitManager>();
 			circuitManager.ChipEnterred += OnChipEnterred;
 
-			circuitInteraction = CircuitInteraction.Instance;
+			circuitInteraction = FindObjectOfType<CircuitInteraction>();
 			circuitInteraction.SelectionChanged += OnSelectionChanged;
+
+			canvasGroup = GetComponent<CanvasGroup>();
 
 			OnChipEnterred(circuitManager.CurrentChip);
 			OnSelectionChanged(circuitInteraction.SelectedElement);
@@ -48,6 +57,11 @@ namespace Transistium.UI
 		private void OnSelectionChanged(CircuitElement element)
 		{
 			ShowSections(element);
+		}
+
+		private void OnApplicationStateChanged(ApplicationState state)
+		{
+			canvasGroup.interactable = state == ApplicationState.DESIGNING;
 		}
 
 	}

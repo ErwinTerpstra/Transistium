@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using Transistium.Design;
 using Transistium.Util;
 using Transistium.Interaction.Components;
+using Transistium.Design;
+
 using Guid = Transistium.Guid;
+using CircuitState = Transistium.Runtime.CircuitState;
+using System.Linq;
 
 namespace Transistium.Interaction
 {
@@ -55,7 +58,7 @@ namespace Transistium.Interaction
 
 		private Project project;
 
-		private Chip currentChip;
+		private List<Pair<Chip, ChipInstance>> activeChipStack;
 		
 		private Observer<Transistor, TransistorBehaviour> transistors;
 
@@ -69,13 +72,25 @@ namespace Transistium.Interaction
 
 		public Project Project => project;
 
-		public Chip CurrentChip => currentChip;
+		public Chip CurrentChip
+		{
+			get
+			{
+				if (activeChipStack.Count == 0)
+					return project.RootChip;
 
-		public Circuit CurrentCircuit => currentChip?.circuit;
+				var pair = activeChipStack[activeChipStack.Count - 1];
+				return pair.first;
+			}
+		}
+
+		public Circuit CurrentCircuit => CurrentChip?.circuit;
 
 		protected override void Awake()
 		{
 			base.Awake();
+
+			activeChipStack = new List<Pair<Chip, ChipInstance>>();
 
 			chipInstances	= new Observer<ChipInstance,	ChipInstanceBehaviour>(CreateChipInstance, DestroyChipInstance);
 			transistors		= new Observer<Transistor,		TransistorBehaviour>(CreateTransistor, DestroyTransistor);
@@ -101,17 +116,47 @@ namespace Transistium.Interaction
 			pins.DetectChanges();
 		}
 
+		public void LoadState(CircuitState state, DebugSymbols symbols)
+		{
+			var circuit = CurrentCircuit;
+			var chipPath = activeChipStack.Select(pair => pair.second).Skip(1);
+			var chipMapping = symbols.GetChipMapping(chipPath);
+
+			foreach (var pair in wires.Mapping)
+			{
+				// NOTE: both A and B ends of the wire should connect to the same compiled wire index
+				var junction = circuit.junctions[pair.Key.a];
+				int wireIndex = chipMapping.junctionMapping[junction];
+
+				// Assign the signal to the wire behaviour
+				pair.Value.Signal = state.wires[wireIndex];
+			}
+		}
+
+		public void ClearState()
+		{
+			foreach (var pair in wires.Mapping)
+				pair.Value.Signal = Runtime.Signal.FLOATING;
+		}
+
 		public void StoreProject()
 		{
 			projectSerializer.Store(project);
 		}
 
-		public void SwitchChip(Chip chip)
+		public void SwitchChip(ChipInstance chipInstance)
 		{
+			SwitchChip(project.GetChip(chipInstance.chipHandle), chipInstance);
+		}
+
+		public void SwitchChip(Chip chip, ChipInstance instance = null)
+		{
+			var currentChip = CurrentChip;
+
 			if (currentChip != null)
 				ChipLeft?.Invoke(currentChip);
 
-			currentChip = chip;
+			activeChipStack.Add(new Pair<Chip, ChipInstance>(chip, instance));
 
 			project.UpdateChipInstances();
 
@@ -124,19 +169,13 @@ namespace Transistium.Interaction
 			ChipEnterred?.Invoke(chip);
 		}
 
-		public Vector2 GetCircuitPosition(Vector3 worldPosition)
-		{
-			return transform.InverseTransformPoint(worldPosition);
-		}
-
-		public Vector3 GetWorldPosition(Vector2 circuitPosition)
-		{
-			return transform.TransformPoint(circuitPosition);
-		}
+		public Vector2 GetCircuitPosition(Vector3 worldPosition) => transform.InverseTransformPoint(worldPosition);
+	
+		public Vector3 GetWorldPosition(Vector2 circuitPosition) => transform.TransformPoint(circuitPosition);
 
 		public Vector3 GetJunctionPosition(Handle<Junction> handle)
 		{
-			return GetJunctionPosition(currentChip.circuit.junctions[handle]);
+			return GetJunctionPosition(CurrentChip.circuit.junctions[handle]);
 		}
 
 		public Vector3 GetJunctionPosition(Junction junction)
@@ -150,7 +189,7 @@ namespace Transistium.Interaction
 
 		private void SetupJunctionBehaviour(Handle<Junction> handle, JunctionBehaviour junctionBehaviour)
 		{
-			var junction = currentChip.circuit.junctions[handle];
+			var junction = CurrentChip.circuit.junctions[handle];
 			junctionBehaviour.Junction = junction;
 
 			var elementBehaviour = junctionBehaviour.GetComponent<CircuitElementBehaviour>();
@@ -222,9 +261,9 @@ namespace Transistium.Interaction
 			elementBehaviour.Element = transistor;
 
 			// Link junction behaviours with the correct junctions
-			SetupJunctionBehaviour(transistor.gate, transistorBehaviour.Gate);
-			SetupJunctionBehaviour(transistor.drain, transistorBehaviour.Drain);
-			SetupJunctionBehaviour(transistor.source, transistorBehaviour.Source);
+			SetupJunctionBehaviour(transistor.@base, transistorBehaviour.Base);
+			SetupJunctionBehaviour(transistor.collector, transistorBehaviour.Collector);
+			SetupJunctionBehaviour(transistor.emitter, transistorBehaviour.Emitter);
 
 			return transistorBehaviour;
 		}

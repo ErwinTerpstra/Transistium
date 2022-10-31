@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Transistium.Design;
+using Transistium.Runtime;
 
 namespace Transistium.Interaction
 {
@@ -11,6 +12,9 @@ namespace Transistium.Interaction
 	{
 		[SerializeField]
 		private float width = 4.0f;
+
+		[SerializeField]
+		private Color activeColor = Color.red;
 
 		private Wire wire;
 
@@ -20,6 +24,8 @@ namespace Transistium.Interaction
 
 		private UIVertex[] quadBuffer;
 
+		private Runtime.Signal signal;
+
 		public Wire Wire
 		{
 			get => wire;
@@ -28,6 +34,18 @@ namespace Transistium.Interaction
 				wire = value;
 				SetVerticesDirty();
 			}
+		}
+
+		public override Color color 
+		{
+			get => signal.ToLogicLevel() ? activeColor : base.color; 
+			set => base.color = value; 
+		}
+
+		public Signal Signal
+		{
+			get => signal;
+			set => signal = value;
 		}
 
 		protected override void Awake()
