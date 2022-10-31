@@ -24,7 +24,7 @@ namespace Transistium.Interaction
 
 		private UIVertex[] quadBuffer;
 
-		private Runtime.Signal signal;
+		private Signal signal;
 
 		public Wire Wire
 		{

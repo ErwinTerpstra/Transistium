@@ -59,6 +59,7 @@ namespace Transistium.Runtime
 			nextState.Reset();
 
 			circuit.Tick(currentState, nextState);
+			currentState = nextState;
 
 			++simulationTicks;
 		}

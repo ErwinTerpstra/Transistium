@@ -59,7 +59,7 @@ namespace Transistium.Runtime
 			Signal se = current.wires[emitter];
 
 			const int columns = 5;
-			int row = ((int)sb * columns * 3 * columns * 3) +
+			int row = ((int)sb * columns * 3 * 3) +
 					  ((int)sc * columns * 3) +
 					  ((int)se * columns);
 

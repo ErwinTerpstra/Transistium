@@ -14,7 +14,7 @@ namespace Transistium
 	public class HandleList<T> : ICollection<T>, ISerializable 
 		where T : class
 	{
-		public class ElementsList : List<Pair<string, T>> { }
+		public class ElementsList : List<Pair<Guid, T>> { }
 
 		[JsonProperty]
 		private ElementsList elements;
@@ -72,11 +72,9 @@ namespace Transistium
 		{
 			PrefixGuid(ref guid);
 			
-			string guidString = guid.ToString();
+			elements.Add(new Pair<Guid, T>(guid, element));
 
-			elements.Add(new Pair<string, T>(guidString, element));
-
-			return new Handle<T>(guidString);
+			return new Handle<T>(guid);
 		}
 
 		public T Remove(Handle<T> handle)

@@ -8,7 +8,7 @@ namespace Transistium.Runtime
 	{
 		public static readonly Signal[] LookupTable = new Signal[]
 		{
-			// Input			// Output (T)		// Input (T+1)		// Output (T+1)
+			// Input (T)		// Output (T)		// Input (T+1)		// Output (T+1)
 			Signal.FLOATING,    Signal.FLOATING,    Signal.FLOATING,	Signal.FLOATING,
 			Signal.FLOATING,    Signal.LOW,         Signal.LOW,			Signal.LOW,
 			Signal.FLOATING,    Signal.HIGH,        Signal.FLOATING,	Signal.HIGH,

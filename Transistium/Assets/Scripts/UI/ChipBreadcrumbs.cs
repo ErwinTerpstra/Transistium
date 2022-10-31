@@ -5,6 +5,7 @@ using UnityEngine;
 
 using Transistium.Design;
 using Transistium.Interaction;
+using System.Linq;
 
 namespace Transistium.UI
 {
@@ -33,10 +34,20 @@ namespace Transistium.UI
 		{
 			levels.Clear();
 
-			levels.Add("Root");
-
-			if (circuitManager.CurrentChip != circuitManager.Project.RootChip)
-				levels.Add(circuitManager.CurrentChip.NameOrDefault);
+			if (circuitManager.IsEditingChipBlueprint)
+			{
+				levels.Add("Project");
+				levels.Add(circuitManager.CurrentChip.NameOrDefault + " (Blueprint)");
+			}
+			else if (circuitManager.CurrentChip == circuitManager.Project.RootChip)
+			{
+				levels.Add("Root");
+			}
+			else
+			{
+				foreach (var pair in circuitManager.ChipPath)
+					levels.Add(pair.first.NameOrDefault);
+			}
 
 			breadcrumbs.SetLevels(levels);
 		}

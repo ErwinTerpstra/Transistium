@@ -101,7 +101,7 @@ namespace Transistium.Design
 					// This in necessary since we don't have other logic to connect two wires together
 					if (pin.direction == PinDirection.INPUT || pin.direction == PinDirection.BIDIRECTIONAL)
 					{
-						compiledCircuit.diodes.Add(new Runtime.Diode()
+						compiledCircuit.diodes.Add(new Diode()
 						{
 							input = outsideWire,
 							output = insideWire
@@ -110,7 +110,7 @@ namespace Transistium.Design
 
 					if (pin.direction == PinDirection.OUTPUT || pin.direction == PinDirection.BIDIRECTIONAL)
 					{
-						compiledCircuit.diodes.Add(new Runtime.Diode()
+						compiledCircuit.diodes.Add(new Diode()
 						{
 							input = insideWire,
 							output = outsideWire,
@@ -156,12 +156,12 @@ namespace Transistium.Design
 			});
 		}
 
-		private void AddGroundIsolator(int from, int to, Runtime.Circuit compiledCircuit)
+		private void AddGroundIsolator(int ground, int input, Runtime.Circuit compiledCircuit)
 		{
 			compiledCircuit.diodes.Add(new Diode()
 			{
-				input = from,
-				output = to
+				input = input,
+				output = ground
 			});
 		}
 

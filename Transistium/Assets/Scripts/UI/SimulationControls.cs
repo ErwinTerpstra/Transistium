@@ -37,7 +37,7 @@ namespace Transistium.UI
 		{
             var state = application.State;
             
-            playButton.gameObject.SetActive(state == ApplicationState.DESIGNING || state == ApplicationState.SIMULATING);
+            playButton.gameObject.SetActive(state == ApplicationState.DESIGNING || state == ApplicationState.PAUSED);
             pauseButton.gameObject.SetActive(state == ApplicationState.SIMULATING);
             stopButton.gameObject.SetActive(state == ApplicationState.SIMULATING || state == ApplicationState.PAUSED);
 		}
@@ -52,12 +52,16 @@ namespace Transistium.UI
         private void OnPauseClicked()
 		{
             application.Pause();
-		}
+
+            UpdateButtons();
+        }
 
         private void OnStopButton()
 		{
             application.Stop();
-		}
+
+            UpdateButtons();
+        }
 
     }
 

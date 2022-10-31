@@ -59,7 +59,7 @@ namespace Transistium.UI
 			}
 
 			// Destroy excessive separators
-			while (separators.Count > levels.Count - 1)
+			while (levels.Count > 0 && separators.Count > levels.Count - 1)
 			{
 				Destroy(separators[separators.Count - 1].gameObject);
 				separators.RemoveAt(separators.Count - 1);

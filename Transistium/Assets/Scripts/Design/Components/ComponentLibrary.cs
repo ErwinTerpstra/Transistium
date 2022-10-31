@@ -8,31 +8,36 @@ namespace Transistium.Design.Components
 	{
 		public static readonly ComponentLibrary Default = Create();
 
-		private Dictionary<string, Component> components;
+		private Dictionary<Guid, Component> components;
 
 		public IEnumerable<Component> AllComponents => components.Values;
 
 		public IEnumerable<Handle<Chip>> AllChips => 
 			AllComponents.Select(
-				component => new Handle<Chip>(component.Guid.ToString())
+				component => new Handle<Chip>(component.Guid)
 			);
 
 		public ComponentLibrary()
 		{
-			components = new Dictionary<string, Component>();
+			components = new Dictionary<Guid, Component>();
 		}
 
 		public void RegisterComponent(Component component)
 		{
-			components.Add(component.Guid.ToString(), component);
+			var guid = component.Guid;
+			guid[0] = (byte)ElementType.CHIP;
+			
+			components.Add(guid, component);
 		}
 
-		public Chip FindChip(string guid) => FindComponent(guid)?.Chip;
+		public Chip FindChip(Guid guid) => FindComponent(guid)?.Chip;
 
 		public Chip FindChip(Handle<Chip> handle) => FindComponent(handle)?.Chip;
 
-		public Component FindComponent(string guid)
+		public Component FindComponent(Guid guid)
 		{
+			guid[0] = (byte)ElementType.CHIP;
+
 			if (components.TryGetValue(guid, out Component component))
 				return component;
 			else

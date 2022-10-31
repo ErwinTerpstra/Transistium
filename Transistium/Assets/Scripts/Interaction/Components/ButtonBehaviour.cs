@@ -13,6 +13,9 @@ namespace Transistium.Interaction.Components
 		private Graphic graphic = null;
 
 		[SerializeField]
+		private Button button = null;
+
+		[SerializeField]
 		private Color defaultColor = Color.white;
 
 		[SerializeField]

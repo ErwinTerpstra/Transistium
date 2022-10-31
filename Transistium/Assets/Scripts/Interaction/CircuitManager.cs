@@ -86,6 +86,10 @@ namespace Transistium.Interaction
 
 		public Circuit CurrentCircuit => CurrentChip?.circuit;
 
+		public IEnumerable<Pair<Chip, ChipInstance>> ChipPath => activeChipStack;
+
+		public bool IsEditingChipBlueprint => activeChipStack.Count == 1 && activeChipStack[0].second == null;
+
 		protected override void Awake()
 		{
 			base.Awake();
@@ -119,23 +123,42 @@ namespace Transistium.Interaction
 		public void LoadState(CircuitState state, DebugSymbols symbols)
 		{
 			var circuit = CurrentCircuit;
-			var chipPath = activeChipStack.Select(pair => pair.second).Skip(1);
-			var chipMapping = symbols.GetChipMapping(chipPath);
+			var chipMapping = symbols.GetChipMapping(activeChipStack.Select(pair => pair.second));
 
 			foreach (var pair in wires.Mapping)
 			{
+				Wire wire = pair.Key;
+				Junction junctionA = wire.a.IsValid ? circuit.junctions[wire.a] : null;
+				Junction junctionB = wire.b.IsValid ? circuit.junctions[wire.b] : null;
+
 				// NOTE: both A and B ends of the wire should connect to the same compiled wire index
-				var junction = circuit.junctions[pair.Key.a];
-				int wireIndex = chipMapping.junctionMapping[junction];
+				int wireIndex = chipMapping.junctionMapping[junctionA ?? junctionB];
 
 				// Assign the signal to the wire behaviour
-				pair.Value.Signal = state.wires[wireIndex];
+				var signal = state.wires[wireIndex];
+				pair.Value.Signal = signal;
+
+				// Assign to junction behaviours as well
+				if (junctionA != null)
+				{
+					JunctionBehaviour behaviour = junctions.Mapping[junctionA];
+					behaviour.Signal = signal;
+				}
+
+				if (junctionB != null)
+				{
+					JunctionBehaviour behaviour = junctions.Mapping[junctionB];
+					behaviour.Signal = signal;
+				}
 			}
 		}
 
 		public void ClearState()
 		{
 			foreach (var pair in wires.Mapping)
+				pair.Value.Signal = Runtime.Signal.FLOATING;
+			
+			foreach (var pair in junctions.Mapping)
 				pair.Value.Signal = Runtime.Signal.FLOATING;
 		}
 
@@ -149,17 +172,30 @@ namespace Transistium.Interaction
 			SwitchChip(project.GetChip(chipInstance.chipHandle), chipInstance);
 		}
 
-		public void SwitchChip(Chip chip, ChipInstance instance = null)
+		public void SwitchChip(Chip chip)
+		{
+			SwitchChip(chip, null);
+		}
+
+		public void SwitchChip(Chip chip, ChipInstance instance)
 		{
 			var currentChip = CurrentChip;
 
 			if (currentChip != null)
 				ChipLeft?.Invoke(currentChip);
 
-			activeChipStack.Add(new Pair<Chip, ChipInstance>(chip, instance));
+			// If we open a chip blueprint instead of an instance, clear the hierarchy stack
+			if (chip == project.RootChip || instance == null)
+				activeChipStack.Clear();
 
+			if (chip != project.RootChip)
+				activeChipStack.Add(new Pair<Chip, ChipInstance>(chip, instance));
+
+			// Take this opportunity to update chip instances for changed properties
+			// (e.g. pin instances have been added/removed)
 			project.UpdateChipInstances();
 
+			// Change our observers to the new chip
 			chipInstances.Observe(chip.circuit.chipInstances);
 			transistors.Observe(chip.circuit.transistors);
 			junctions.Observe(chip.circuit.junctions);
@@ -200,9 +236,13 @@ namespace Transistium.Interaction
 
 		private ComponentBehaviour GetComponentPrefab(Guid guid)
 		{
+			guid[0] = (byte)ElementType.CHIP;
+
 			foreach (var componentPrefab in prefabs.components)
 			{
 				Guid componentGuid = Guid.Hash(componentPrefab.componentID);
+				componentGuid[0] = (byte)ElementType.CHIP;
+
 				if (componentGuid == guid)
 					return componentPrefab.prefab;
 			}
@@ -233,7 +273,7 @@ namespace Transistium.Interaction
 			}
 
 			// Instantiate the behaviour
-			ChipInstanceBehaviour chipInstanceBehaviour = Instantiate(prefabs.chipInstance, elementRoot, false);
+			ChipInstanceBehaviour chipInstanceBehaviour = Instantiate(prefab, elementRoot, false);
 			chipInstanceBehaviour.PinInstanceCreated += OnPinInstanceCreated;
 			chipInstanceBehaviour.PinInstanceDestroyed += OnPinInstanceDestroyed;
 			chipInstanceBehaviour.Configure(chip, chipInstance);

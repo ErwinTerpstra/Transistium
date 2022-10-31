@@ -5,13 +5,13 @@ namespace Transistium
 	[Serializable]
 	public struct Handle<T> : IEquatable<Handle<T>> where T : class
 	{
-		public static readonly Handle<T> Invalid = new Handle<T>(null);
+		public static readonly Handle<T> Invalid = new Handle<T>(Guid.Empty);
 
-		public string guid;
+		public Guid guid;
 
-		public bool IsValid => !string.IsNullOrEmpty(guid);
+		public bool IsValid => guid != Guid.Empty;
 
-		public Handle(string guid)
+		public Handle(Guid guid)
 		{
 			this.guid = guid;
 		}
