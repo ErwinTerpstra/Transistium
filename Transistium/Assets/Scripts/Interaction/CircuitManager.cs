@@ -10,6 +10,7 @@ using Transistium.Design;
 using Guid = Transistium.Guid;
 using CircuitState = Transistium.Runtime.CircuitState;
 using System.Linq;
+using Transistium.Design.Components;
 
 namespace Transistium.Interaction
 {
@@ -59,15 +60,11 @@ namespace Transistium.Interaction
 		private Project project;
 
 		private List<Pair<Chip, ChipInstance>> activeChipStack;
-		
-		private Observer<Transistor, TransistorBehaviour> transistors;
-
-		private Observer<Junction, JunctionBehaviour> junctions;
-
-		private Observer<Wire, WireBehaviour> wires;
 
 		private Observer<Pin, PinBehaviour> pins;
-
+		private Observer<Wire, WireBehaviour> wires;
+		private Observer<Junction, JunctionBehaviour> junctions;
+		private Observer<Transistor, TransistorBehaviour> transistors;
 		private Observer<ChipInstance, ChipInstanceBehaviour> chipInstances;
 
 		public Project Project => project;
@@ -87,6 +84,8 @@ namespace Transistium.Interaction
 		public Circuit CurrentCircuit => CurrentChip?.circuit;
 
 		public IEnumerable<Pair<Chip, ChipInstance>> ChipPath => activeChipStack;
+
+		public ChipInstancePath ChipInstancePath => new ChipInstancePath(activeChipStack.Select(pair => pair.second));
 
 		public bool IsEditingChipBlueprint => activeChipStack.Count == 1 && activeChipStack[0].second == null;
 
@@ -113,17 +112,29 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
-			chipInstances.DetectChanges();
-			transistors.DetectChanges();
-			junctions.DetectChanges();
-			wires.DetectChanges();
 			pins.DetectChanges();
+			wires.DetectChanges();
+			junctions.DetectChanges();
+			transistors.DetectChanges();
+			chipInstances.DetectChanges();
+		}
+
+		public void ClearState()
+		{
+			foreach (var pair in wires.Mapping)
+				pair.Value.Signal = Runtime.Signal.FLOATING;
+
+			foreach (var pair in junctions.Mapping)
+				pair.Value.Signal = Runtime.Signal.FLOATING;
 		}
 
 		public void LoadState(CircuitState state, DebugSymbols symbols)
 		{
+			if (IsEditingChipBlueprint)
+				return;
+
 			var circuit = CurrentCircuit;
-			var chipMapping = symbols.GetChipMapping(activeChipStack.Select(pair => pair.second));
+			var chipMapping = symbols.GetChipMapping(ChipInstancePath);
 
 			foreach (var pair in wires.Mapping)
 			{
@@ -153,13 +164,29 @@ namespace Transistium.Interaction
 			}
 		}
 
-		public void ClearState()
+
+		public void StoreState(ComponentInstanceMapping componentInstances)
 		{
-			foreach (var pair in wires.Mapping)
-				pair.Value.Signal = Runtime.Signal.FLOATING;
-			
-			foreach (var pair in junctions.Mapping)
-				pair.Value.Signal = Runtime.Signal.FLOATING;
+			if (IsEditingChipBlueprint)
+				return;
+
+			var currentPath = ChipInstancePath;
+
+			foreach (var instance in componentInstances.All)
+			{
+				// Only search for instances in our current active chip
+				if (!instance.Path.Parent.Match(currentPath))
+					continue;
+
+				ChipInstance chipInstance = instance.Path.Leaf;
+
+				// Retrieve the prefab instance for this chip instance/component
+				ChipInstanceBehaviour chipInstanceBehaviour = chipInstances.Mapping[chipInstance];
+				ComponentBehaviour componentBehaviour = chipInstanceBehaviour.GetComponent<ComponentBehaviour>();
+
+				// Let the component behaviour store UI state in the component data
+				componentBehaviour.StoreState(instance.Data);
+			}
 		}
 
 		public void StoreProject()
@@ -268,6 +295,7 @@ namespace Transistium.Interaction
 			}
 			else
 			{
+				// Otherwise use the default chip instance prefa
 				chip = project.GetChip(chipInstance.chipHandle);
 				prefab = prefabs.chipInstance;
 			}

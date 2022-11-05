@@ -7,13 +7,15 @@ using UnityEngine.UI;
 
 namespace Transistium.Interaction.Components
 {
-    public class ButtonBehaviour : ComponentBehaviour, IPointerDownHandler, IPointerUpHandler
+	using Button = Design.Components.Button;
+
+	public class ButtonBehaviour : ComponentBehaviour<Button.Data>
     {
 		[SerializeField]
 		private Graphic graphic = null;
 
 		[SerializeField]
-		private Button button = null;
+		private UIButton button = null;
 
 		[SerializeField]
 		private Color defaultColor = Color.white;
@@ -28,6 +30,16 @@ namespace Transistium.Interaction.Components
 			base.Awake();
 
 			UpdateState();
+
+			button.Pressed += OnButtonPressed;
+			button.Released += OnButtonReleased;
+		}
+
+		protected override void StoreState(Button.Data data)
+		{
+			base.StoreState(data);
+
+			data.pressed = pressState;
 		}
 
 		private void UpdateState()
@@ -35,13 +47,13 @@ namespace Transistium.Interaction.Components
 			graphic.color = pressState ? pressedColor : defaultColor;
 		}
 
-		void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
+		private void OnButtonPressed(UIButton button)
 		{
 			pressState = true;
 			UpdateState();
 		}
 
-		void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
+		private void OnButtonReleased(UIButton button)
 		{
 			pressState = false;
 			UpdateState();

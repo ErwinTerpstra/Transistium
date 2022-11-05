@@ -7,7 +7,17 @@ namespace Transistium
 {
 	public unsafe struct Guid : IEquatable<Guid>
 	{
-		public static readonly Guid Empty = new Guid();
+		public static Guid Empty
+		{
+			get
+			{
+				var guid = new Guid();
+				for (int i = 0; i < LENGTH; ++i)
+					guid[i] = 0;
+
+				return guid;
+			}
+		}
 
 		private static RandomNumberGenerator rng = RandomNumberGenerator.Create();
 

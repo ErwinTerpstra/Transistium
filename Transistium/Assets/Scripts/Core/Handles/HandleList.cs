@@ -47,13 +47,17 @@ namespace Transistium
 			elements.AddRange(list);
 		}
 
-		public T this[Handle<T> handle]
+		public T this[Handle<T> handle] => this[handle.guid];
+
+		public T this[Guid guid]
 		{
 			get
 			{
+				PrefixGuid(ref guid);
+
 				foreach (var pair in elements)
 				{
-					if (pair.first == handle.guid)
+					if (pair.first == guid)
 						return pair.second;
 				}
 
@@ -64,6 +68,12 @@ namespace Transistium
 		private void PrefixGuid(ref Guid guid)
 		{
 			guid[0] = hashPrefix;
+		}
+
+		public Handle<T> CreateHandle(Guid guid)
+		{
+			PrefixGuid(ref guid);
+			return new Handle<T>(guid);
 		}
 
 		public Handle<T> Add(T element) => Add(Guid.Generate(), element);

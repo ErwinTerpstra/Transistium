@@ -6,6 +6,11 @@ namespace Transistium.Runtime
 {
 	public class CircuitSimulator
 	{
+		public delegate void CircuitStateEvent(CircuitState currentState, CircuitState nextState);
+
+		public event CircuitStateEvent BeforeTick;
+		public event CircuitStateEvent AfterTick;
+
 		private Circuit circuit;
 
 		private CircuitState currentState;
@@ -58,7 +63,11 @@ namespace Transistium.Runtime
 			CircuitState nextState = previousState;
 			nextState.Reset();
 
+			BeforeTick?.Invoke(currentState, nextState);
+
 			circuit.Tick(currentState, nextState);
+			AfterTick?.Invoke(currentState, nextState);
+
 			currentState = nextState;
 
 			++simulationTicks;

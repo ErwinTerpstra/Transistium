@@ -26,6 +26,7 @@ namespace Transistium.Design
 		public Project()
 		{
 			chips = new HandleList<Chip>((byte)ElementType.CHIP);
+
 			componentLibrary = ComponentLibrary.Default;
 		}
 
@@ -46,6 +47,15 @@ namespace Transistium.Design
 		public Chip GetChip(Handle<Chip> handle)
 		{
 			return componentLibrary.FindChip(handle) ?? chips[handle];
+		}
+
+		public Chip GetChip(ChipInstancePath path)
+		{
+			if (path.IsRoot)
+				return RootChip;
+
+			ChipInstance instance = path.Leaf;
+			return GetChip(instance.chipHandle);
 		}
 
 		public Handle<Chip> LookupChipHandle(Chip chip)

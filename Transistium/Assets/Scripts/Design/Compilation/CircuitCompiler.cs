@@ -2,6 +2,7 @@
 
 using Transistium.Util;
 using Transistium.Runtime;
+using Transistium.Design.Components;
 
 namespace Transistium.Design
 {
@@ -18,14 +19,21 @@ namespace Transistium.Design
 		{
 			var compiledCircuit = new Runtime.Circuit();
 
-			ChipMapping chipMapping = CompileCircuit(project, project.RootChip, compiledCircuit);
+			// Recursively compile all circuits, starting at the root chip
+			ChipMapping rootChipMapping = CompileCircuit(project, project.RootChip, compiledCircuit);
 
+			// Create instances for all components
+			ComponentInstanceMapping instances = new ComponentInstanceMapping();
+			CreateComponentInstances(project, ChipInstancePath.Root, rootChipMapping, instances);
+
+			// Return compiled circuit and the meta data
 			return new CompilationResult()
 			{
 				circuit = compiledCircuit,
+				componentInstances = instances,
 				symbols = new DebugSymbols()
 				{
-					rootChipMapping = chipMapping,
+					rootChipMapping = rootChipMapping,
 				}
 			};
 		}
@@ -78,7 +86,7 @@ namespace Transistium.Design
 				ChipMapping childChipMapping = CompileCircuit(project, childChip, compiledCircuit);
 
 				// Store the child mapping
-				childChipMapping.chipInstanceMapping.Add(chipInstance, childChipMapping);
+				chipMapping.chipInstanceMapping.Add(chipInstance, childChipMapping);
 
 				// Connect pin instances to the pin junctions on the "inside" of the chip
 				foreach (var pinInstance in chipInstance.pins)
@@ -137,6 +145,33 @@ namespace Transistium.Design
 			AddGroundIsolator(Runtime.Circuit.WIRE_GND, gndWire, compiledCircuit);
 
 			return chipMapping;
+		}
+
+		private void CreateComponentInstances(Project project, ChipInstancePath path, ChipMapping chipMapping, ComponentInstanceMapping instances)
+		{
+			// Retrieve the chip for this path
+			Chip chip = project.GetChip(path);
+
+			// Loop through all chip instances in this circuit
+			foreach (var chipInstance in chip.circuit.chipInstances.AllElements)
+			{
+				ChipInstancePath childPath = path.Add(chipInstance);
+				ChipMapping childMapping = chipMapping.chipInstanceMapping[chipInstance];
+
+				// Check if this is an instantiated component
+				var component = project.componentLibrary.FindComponent(chipInstance.chipHandle);
+
+				if (component != null)
+				{
+					ComponentInstance componentInstance = new ComponentInstance(childPath, childMapping, component);
+					instances.Add(childPath, componentInstance);
+				}
+				else
+				{
+					// Otherwise recurse into this chip to look for components
+					CreateComponentInstances(project, childPath, childMapping, instances);
+				}
+			}
 		}
 
 		private void AddInputIsolator(int from, int to, Runtime.Circuit compiledCircuit)

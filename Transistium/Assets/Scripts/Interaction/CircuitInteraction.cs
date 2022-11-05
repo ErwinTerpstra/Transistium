@@ -220,6 +220,14 @@ namespace Transistium.Interaction
 			}
 		}
 
+		private void HandleDoubleClick(PointerEventData eventData)
+		{
+			var target = eventData.pointerCurrentRaycast.gameObject;
+			var chipInstanceBehaviour = target.GetComponentInParent<ChipInstanceBehaviour>();
+
+			circuitManager.SwitchChip(chipInstanceBehaviour.ChipInstance);
+		}
+
 		private void HandleRightClick(PointerEventData eventData)
 		{
 
@@ -233,7 +241,10 @@ namespace Transistium.Interaction
 			switch (eventData.button)
 			{
 				case PointerEventData.InputButton.Left:
-					HandleLeftClick(eventData);
+					if (eventData.clickCount == 1)
+						HandleLeftClick(eventData);
+					else if (eventData.clickCount == 2)
+						HandleDoubleClick(eventData);
 					break;
 
 				case PointerEventData.InputButton.Right:

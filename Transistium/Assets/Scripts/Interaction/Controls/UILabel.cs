@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Transistium.Interaction
 {
-	public class Label : MonoBehaviour
+	public class UILabel : MonoBehaviour
 	{
 		[SerializeField]
 		private bool keepUpright = true;

@@ -1,5 +1,6 @@
 ﻿using System
 	;
+using Transistium.Design.Components;
 using UnityEngine;
 
 namespace Transistium.Interaction.Components
@@ -11,14 +12,17 @@ namespace Transistium.Interaction.Components
 
 		}
 
-		public virtual void LoadState()
-		{
+		public abstract void StoreState(ComponentData data);
+	}
 
+	public abstract class ComponentBehaviour<DataType> : ComponentBehaviour
+		where DataType : ComponentData
+	{
+		public override sealed void StoreState(ComponentData data)
+		{
+			StoreState(data as DataType);
 		}
 
-		public virtual void StoreState()
-		{
-
-		}
+		protected virtual void StoreState(DataType data) { }
 	}
 }

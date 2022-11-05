@@ -24,6 +24,17 @@ namespace Transistium.Runtime
 			Reset();
 		}
 
+		public CircuitState(CircuitState other)
+		{
+			circuit = other.circuit;
+
+			transistors = new bool[other.transistors.Length];
+			wires = new Signal[other.wires.Length];
+
+			Array.Copy(other.transistors, transistors, transistors.Length);
+			Array.Copy(other.wires, wires, wires.Length);
+		}
+
 		public void Reset()
 		{
 			for (int i = 0, c = transistors.Length; i < c; ++i)

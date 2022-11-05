@@ -20,6 +20,7 @@ namespace Transistium.Design
 		{
 			serializer = new JsonSerializer();
 			serializer.Formatting = Formatting.Indented;
+			serializer.Converters.Add(new GuidConverter());
 			serializer.Converters.Add(new Vector2Converter());
 			serializer.ContractResolver = new ProjectContractResolver();
 
