@@ -42,19 +42,20 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
-			if (state != ApplicationState.SIMULATING)
-				return;
+			if (state == ApplicationState.SIMULATING)
+			{
+				float dt = Time.deltaTime;
 
-			float dt = Time.deltaTime;
+				manager.StoreState(compilationResult.componentInstances);
 
-			manager.StoreState(compilationResult.componentInstances);
+				foreach (var componentInstance in compilationResult.componentInstances.All)
+					componentInstance.Update(dt, simulator.CurrentState);
 
-			foreach (var componentInstance in compilationResult.componentInstances.All)
-				componentInstance.Update(dt, simulator.CurrentState);
+				simulator.Update(dt);
+			}
 
-			simulator.Update(dt);
-
-			manager.LoadState(simulator.CurrentState, compilationResult.symbols);
+			if (state != ApplicationState.DESIGNING)
+				manager.LoadState(simulator.CurrentState, compilationResult.symbols);
 		}
 
 		public void Play()
@@ -98,7 +99,10 @@ namespace Transistium.Interaction
 		private void OnBeforeTick(CircuitState currentState, CircuitState nextState)
 		{
 			foreach (var componentInstance in compilationResult.componentInstances.All)
-				componentInstance.WriteToState(nextState);
+			{
+				componentInstance.WriteToState(currentState);
+				//componentInstance.WriteToState(nextState);
+			}
 		}
 	}
 

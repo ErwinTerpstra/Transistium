@@ -11,15 +11,15 @@ namespace Transistium.Runtime
 		{
 			// A (T)			// B (T)			// A (T+1)			// B (T+1)
 			Signal.FLOATING,	Signal.FLOATING,	Signal.FLOATING,	Signal.FLOATING,
-			Signal.FLOATING,    Signal.LOW,			Signal.LOW,			Signal.LOW,
-			Signal.FLOATING,    Signal.HIGH,		Signal.HIGH,		Signal.HIGH,
+			Signal.FLOATING,    Signal.LOW,			Signal.LOW,			Signal.FLOATING,
+			Signal.FLOATING,    Signal.HIGH,		Signal.HIGH,		Signal.FLOATING,
 
-			Signal.LOW,         Signal.FLOATING,	Signal.LOW,			Signal.FLOATING,
+			Signal.LOW,         Signal.FLOATING,	Signal.FLOATING,	Signal.FLOATING,
 			Signal.LOW,         Signal.LOW,			Signal.LOW,			Signal.LOW,
-			Signal.LOW,         Signal.HIGH,		Signal.LOW,			Signal.HIGH,
+			Signal.LOW,         Signal.HIGH,		Signal.FLOATING,	Signal.FLOATING,
 
-			Signal.HIGH,        Signal.FLOATING,	Signal.HIGH,		Signal.HIGH,
-			Signal.HIGH,        Signal.LOW,			Signal.HIGH,		Signal.LOW,
+			Signal.HIGH,        Signal.FLOATING,	Signal.FLOATING,	Signal.HIGH,
+			Signal.HIGH,        Signal.LOW,			Signal.FLOATING,	Signal.FLOATING,
 			Signal.HIGH,        Signal.HIGH,		Signal.HIGH,		Signal.HIGH,
 		};
 
@@ -34,8 +34,8 @@ namespace Transistium.Runtime
 			int row = ((int)sa * columns * 3) +
 					  ((int)sb * columns);
 
-			next.wires[a] = LookupTable[row + 2];
-			next.wires[b] = LookupTable[row + 3];
+			SignalUtil.Merge(LookupTable[row + 2], ref next.wires[a]);
+			SignalUtil.Merge(LookupTable[row + 3], ref next.wires[b]);
 		}
 	}
 

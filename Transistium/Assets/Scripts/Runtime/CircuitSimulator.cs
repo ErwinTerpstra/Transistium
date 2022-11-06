@@ -60,14 +60,18 @@ namespace Transistium.Runtime
 			if (circuit == null)
 				return;
 
+			// Prepare our "previous state" to be overwritten as the next state
 			CircuitState nextState = previousState;
 			nextState.Reset();
 
 			BeforeTick?.Invoke(currentState, nextState);
 
 			circuit.Tick(currentState, nextState);
+
 			AfterTick?.Invoke(currentState, nextState);
 
+			// Swap states
+			previousState = currentState;
 			currentState = nextState;
 
 			++simulationTicks;

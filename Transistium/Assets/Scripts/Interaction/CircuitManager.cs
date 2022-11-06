@@ -194,6 +194,11 @@ namespace Transistium.Interaction
 			projectSerializer.Store(project);
 		}
 
+		public void SwitchToRoot()
+		{
+			SwitchChip(project.RootChip);
+		}
+
 		public void SwitchChip(ChipInstance chipInstance)
 		{
 			SwitchChip(project.GetChip(chipInstance.chipHandle), chipInstance);

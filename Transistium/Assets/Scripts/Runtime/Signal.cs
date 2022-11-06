@@ -11,8 +11,29 @@ namespace Transistium.Runtime
 
 	public static class SignalExtensions
 	{
-		// Since state are bit flags, this returns false the case where the wire is both pulled high and pulled low
 		public static bool ToLogicLevel(this Signal signal) => signal == Signal.HIGH;
+	}
+
+	public static class SignalUtil
+	{
+
+		public static void Merge(Signal src, ref Signal dst)
+		{
+			dst = Merge(src, dst);
+		}
+
+		public static Signal Merge(Signal src, Signal dst)
+		{
+			// TODO: replace with lookup table
+			switch (dst)
+			{
+				default:
+				case Signal.FLOATING: return src;
+
+				case Signal.LOW: return Signal.LOW;
+				case Signal.HIGH: return src == Signal.LOW ? Signal.LOW : Signal.HIGH;
+			}
+		}
 	}
 
 }

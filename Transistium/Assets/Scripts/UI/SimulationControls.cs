@@ -33,6 +33,22 @@ namespace Transistium.UI
             UpdateButtons();
 		}
 
+		private void Update()
+        {
+            if (application.State == ApplicationState.SIMULATING)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                    application.Pause();
+            }
+            else if (application.State == ApplicationState.PAUSED)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                    application.Play();
+            }
+
+            UpdateButtons();
+        }
+
 		private void UpdateButtons()
 		{
             var state = application.State;
@@ -45,22 +61,16 @@ namespace Transistium.UI
         private void OnPlayClicked()
 		{
             application.Play();
-
-            UpdateButtons();
 		}
 
         private void OnPauseClicked()
 		{
             application.Pause();
-
-            UpdateButtons();
         }
 
         private void OnStopButton()
 		{
             application.Stop();
-
-            UpdateButtons();
         }
 
     }

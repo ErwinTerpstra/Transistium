@@ -51,19 +51,7 @@ namespace Transistium.Design
 		public void WriteToState(CircuitState state)
 		{
 			foreach (var pair in outputSignals)
-				state.wires[pair.Key] = MergeSignals(pair.Value, state.wires[pair.Key]);
-		}
-
-		private Signal MergeSignals(Signal src, Signal dst)
-		{
-			switch (dst)
-			{
-				default:
-				case Signal.FLOATING:	return src;
-
-				case Signal.LOW:		return Signal.LOW;
-				case Signal.HIGH:		return src == Signal.LOW ? Signal.LOW : Signal.HIGH;
-			}
+				state.wires[pair.Key] = pair.Value;
 		}
 	}
 }

@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 using Transistium.Design;
 using Transistium.Util;
+using Transistium.Interaction.Components;
 
 namespace Transistium.Interaction
 {
@@ -224,8 +225,10 @@ namespace Transistium.Interaction
 		{
 			var target = eventData.pointerCurrentRaycast.gameObject;
 			var chipInstanceBehaviour = target.GetComponentInParent<ChipInstanceBehaviour>();
+			var componentBehaviour = target.GetComponentInParent<ComponentBehaviour>();
 
-			circuitManager.SwitchChip(chipInstanceBehaviour.ChipInstance);
+			if (chipInstanceBehaviour && !componentBehaviour)
+				circuitManager.SwitchChip(chipInstanceBehaviour.ChipInstance);
 		}
 
 		private void HandleRightClick(PointerEventData eventData)

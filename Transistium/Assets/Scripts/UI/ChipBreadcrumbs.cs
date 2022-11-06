@@ -39,12 +39,10 @@ namespace Transistium.UI
 				levels.Add("Project");
 				levels.Add(circuitManager.CurrentChip.NameOrDefault + " (Blueprint)");
 			}
-			else if (circuitManager.CurrentChip == circuitManager.Project.RootChip)
+			else 
 			{
 				levels.Add("Root");
-			}
-			else
-			{
+
 				foreach (var pair in circuitManager.ChipPath)
 					levels.Add(pair.first.NameOrDefault);
 			}
@@ -58,7 +56,13 @@ namespace Transistium.UI
 			if (level == levels.Count - 1)
 				return;
 
-			circuitManager.SwitchChip(circuitManager.Project.RootChip);
+			if (level > 0)
+			{
+				var pair = circuitManager.ChipPath.ElementAt(level);
+				circuitManager.SwitchChip(pair.first, pair.second);
+			}
+			else
+				circuitManager.SwitchToRoot();
 		}
 	}
 
