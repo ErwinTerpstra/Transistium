@@ -57,7 +57,7 @@ namespace Transistium.Interaction
 			}
 
 			if (state != ApplicationState.DESIGNING)
-				manager.LoadState(simulator.CurrentState, compilationResult.symbols);
+				manager.LoadState(simulator.CurrentState, compilationResult.componentInstances, compilationResult.symbols);
 		}
 
 		public void Play()

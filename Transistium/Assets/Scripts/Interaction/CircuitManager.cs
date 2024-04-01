@@ -128,7 +128,7 @@ namespace Transistium.Interaction
 				pair.Value.Signal = Runtime.Signal.FLOATING;
 		}
 
-		public void LoadState(CircuitState state, DebugSymbols symbols)
+		public void LoadState(CircuitState state, ComponentInstanceMapping componentInstances, DebugSymbols symbols)
 		{
 			if (IsEditingChipBlueprint)
 				return;
@@ -162,6 +162,23 @@ namespace Transistium.Interaction
 					behaviour.Signal = signal;
 				}
 			}
+
+			var currentPath = ChipInstancePath;
+			foreach (var instance in componentInstances.All)
+			{
+				// Only search for instances in our current active chip
+				if (!instance.Path.Parent.Match(currentPath))
+					continue;
+
+				ChipInstance chipInstance = instance.Path.Leaf;
+
+				// Retrieve the prefab instance for this chip instance/component
+				ChipInstanceBehaviour chipInstanceBehaviour = chipInstances.Mapping[chipInstance];
+				ComponentBehaviour componentBehaviour = chipInstanceBehaviour.GetComponent<ComponentBehaviour>();
+
+				// Let the component behaviour load UI state from the component data
+				componentBehaviour.LoadState(instance.Data);
+			}
 		}
 
 
@@ -188,6 +205,7 @@ namespace Transistium.Interaction
 				componentBehaviour.StoreState(instance.Data);
 			}
 		}
+
 
 		public void StoreProject()
 		{

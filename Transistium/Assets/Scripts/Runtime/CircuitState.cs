@@ -31,8 +31,7 @@ namespace Transistium.Runtime
 			transistors = new bool[other.transistors.Length];
 			wires = new Signal[other.wires.Length];
 
-			Array.Copy(other.transistors, transistors, transistors.Length);
-			Array.Copy(other.wires, wires, wires.Length);
+			CopyFrom(other);
 		}
 
 		public void Reset()
@@ -47,5 +46,10 @@ namespace Transistium.Runtime
 			wires[Circuit.WIRE_GND] = Signal.LOW;
 		}
 
+		public void CopyFrom(CircuitState other)
+		{
+			Array.Copy(other.transistors, transistors, transistors.Length);
+			Array.Copy(other.wires, wires, wires.Length);
+		}
 	}
 }
