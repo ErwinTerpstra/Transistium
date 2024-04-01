@@ -29,7 +29,7 @@ namespace Transistium
 
 			Vector2 direction = ab.normalized;
 
-			float dot = Vector3.Dot(direction, ap);
+			float dot = Mathf.Clamp01(Vector3.Dot(direction, ap));
 			pointOnLine = a + direction * dot;
 
 			return Vector2.Distance(pointOnLine, p);
