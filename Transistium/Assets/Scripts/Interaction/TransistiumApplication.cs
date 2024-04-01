@@ -32,6 +32,8 @@ namespace Transistium.Interaction
 		{
 			base.Awake();
 
+			Application.targetFrameRate = 60;
+
 			manager = FindObjectOfType<CircuitManager>();
 
 			compiler = new CircuitCompiler();
