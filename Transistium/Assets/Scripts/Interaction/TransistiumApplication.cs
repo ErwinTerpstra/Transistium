@@ -40,6 +40,8 @@ namespace Transistium.Interaction
 			simulator = new CircuitSimulator();
 
 			simulator.BeforeTick += OnBeforeTick;
+
+			manager.ChipEnterred += OnChipEnterred;
 		}
 
 		private void Update()
@@ -48,7 +50,7 @@ namespace Transistium.Interaction
 			{
 				float dt = Time.deltaTime;
 
-				manager.StoreState(compilationResult.componentInstances);
+				manager.StoreComponentState(compilationResult.componentInstances);
 
 				foreach (var componentInstance in compilationResult.componentInstances.All)
 					componentInstance.Update(dt, simulator.CurrentState);
@@ -57,7 +59,13 @@ namespace Transistium.Interaction
 			}
 
 			if (state != ApplicationState.DESIGNING)
-				manager.LoadState(simulator.CurrentState, compilationResult.componentInstances, compilationResult.symbols);
+			{
+				manager.LoadCircuitState(
+					simulator.CurrentState,
+					simulator.Metrics,
+					compilationResult.symbols
+				);
+			}
 		}
 
 		public void Play()
@@ -81,7 +89,7 @@ namespace Transistium.Interaction
 
 		public void Stop()
 		{
-			manager.ClearState();
+			manager.ClearCircuitState();
 
 			SetState(ApplicationState.DESIGNING);
 		}
@@ -103,8 +111,13 @@ namespace Transistium.Interaction
 			foreach (var componentInstance in compilationResult.componentInstances.All)
 			{
 				componentInstance.WriteToState(currentState);
-				//componentInstance.WriteToState(nextState);
+				componentInstance.WriteToState(nextState);
 			}
+		}
+		private void OnChipEnterred(Chip chip)
+		{
+			if (compilationResult != null)
+				manager.LoadComponentState(compilationResult.componentInstances);
 		}
 	}
 

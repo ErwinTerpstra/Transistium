@@ -8,9 +8,12 @@ using Transistium.Interaction.Components;
 using Transistium.Design;
 
 using Guid = Transistium.Guid;
+using Transistor = Transistium.Design.Transistor;
+using Circuit = Transistium.Design.Circuit;
 using CircuitState = Transistium.Runtime.CircuitState;
 using System.Linq;
 using Transistium.Design.Components;
+using Transistium.Runtime;
 
 namespace Transistium.Interaction
 {
@@ -192,13 +195,12 @@ namespace Transistium.Interaction
 		}
 
 
-		public void StoreState(ComponentInstanceMapping componentInstances)
+		public void StoreComponentState(ComponentInstanceMapping componentInstances)
 		{
 			if (IsEditingChipBlueprint)
 				return;
 
 			var currentPath = ChipInstancePath;
-
 			foreach (var instance in componentInstances.All)
 			{
 				// Only search for instances in our current active chip

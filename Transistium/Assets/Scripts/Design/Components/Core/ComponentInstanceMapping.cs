@@ -20,6 +20,11 @@ namespace Transistium.Design.Components
 			instances.Add(path, instance);
 		}
 
+		public bool Find(ChipInstancePath path, out ComponentInstance instance)
+		{
+			return instances.TryGetValue(path, out instance);
+		}
+
 		public IEnumerable<ComponentInstance> MatchPath(ChipInstancePath path)
 		{
 			foreach (var pair in instances)
