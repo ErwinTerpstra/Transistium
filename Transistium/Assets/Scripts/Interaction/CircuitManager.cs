@@ -119,7 +119,7 @@ namespace Transistium.Interaction
 			chipInstances.DetectChanges();
 		}
 
-		public void ClearState()
+		public void ClearCircuitState()
 		{
 			foreach (var pair in wires.Mapping)
 				pair.Value.Signal = Runtime.Signal.FLOATING;
@@ -128,7 +128,11 @@ namespace Transistium.Interaction
 				pair.Value.Signal = Runtime.Signal.FLOATING;
 		}
 
-		public void LoadState(CircuitState state, ComponentInstanceMapping componentInstances, DebugSymbols symbols)
+		public void LoadCircuitState(
+			CircuitState state,
+			CircuitMetrics metrics,
+			DebugSymbols symbols
+		)
 		{
 			if (IsEditingChipBlueprint)
 				return;
@@ -136,9 +140,8 @@ namespace Transistium.Interaction
 			var circuit = CurrentCircuit;
 			var chipMapping = symbols.GetChipMapping(ChipInstancePath);
 
-			foreach (var pair in wires.Mapping)
+			foreach ((Wire wire, WireBehaviour wireBehaviour) in wires.Mapping)
 			{
-				Wire wire = pair.Key;
 				Junction junctionA = wire.a.IsValid ? circuit.junctions[wire.a] : null;
 				Junction junctionB = wire.b.IsValid ? circuit.junctions[wire.b] : null;
 
@@ -147,21 +150,28 @@ namespace Transistium.Interaction
 
 				// Assign the signal to the wire behaviour
 				var signal = state.wires[wireIndex];
-				pair.Value.Signal = signal;
+				wireBehaviour.Signal = signal;
+				wireBehaviour.Metrics = metrics.GetWireMetrics(wireIndex);
 
 				// Assign to junction behaviours as well
 				if (junctionA != null)
 				{
-					JunctionBehaviour behaviour = junctions.Mapping[junctionA];
-					behaviour.Signal = signal;
+					JunctionBehaviour junctionBehaviour = junctions.Mapping[junctionA];
+					junctionBehaviour.Signal = signal;
 				}
 
 				if (junctionB != null)
 				{
-					JunctionBehaviour behaviour = junctions.Mapping[junctionB];
-					behaviour.Signal = signal;
+					JunctionBehaviour junctionBehaviour = junctions.Mapping[junctionB];
+					junctionBehaviour.Signal = signal;
 				}
 			}
+		}
+
+		public void LoadComponentState(ComponentInstanceMapping componentInstances)
+		{
+			if (IsEditingChipBlueprint)
+				return;
 
 			var currentPath = ChipInstancePath;
 			foreach (var instance in componentInstances.All)

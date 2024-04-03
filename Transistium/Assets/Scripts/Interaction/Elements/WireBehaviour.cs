@@ -16,6 +16,9 @@ namespace Transistium.Interaction
 		[SerializeField]
 		private Color activeColor = Color.red;
 
+		[SerializeField]
+		private UILabel label = null;
+
 		private Wire wire;
 
 		private List<Vector3> pathBuffer;
@@ -25,6 +28,8 @@ namespace Transistium.Interaction
 		private UIVertex[] quadBuffer;
 
 		private Signal signal;
+
+		private WireMetrics metrics;
 
 		public Wire Wire
 		{
@@ -48,12 +53,52 @@ namespace Transistium.Interaction
 			set => signal = value;
 		}
 
+		public WireMetrics Metrics
+		{
+			get => metrics;
+			set
+			{
+				metrics = value;
+				UpdateLabel();
+			}
+		}
+
+		private Vector2 FirstPosition
+		{
+			get
+			{
+				if (wire.a.IsValid)
+					return CircuitManager.Instance.GetJunctionPosition(wire.a);
+
+				if (wire.vertices.Count > 0)
+					return CircuitManager.Instance.GetWorldPosition(wire.vertices[0]);
+
+				return Vector2.zero;
+			}
+		}
+
+		private Vector2 LastPosition
+		{
+			get
+			{
+				if (wire.b.IsValid)
+					return CircuitManager.Instance.GetJunctionPosition(wire.b);
+
+				if (wire.vertices.Count > 0)
+					return CircuitManager.Instance.GetWorldPosition(wire.vertices[^1]);
+
+				return Vector2.zero;
+			}
+		}
+
 		protected override void Awake()
 		{
 			base.Awake();
 
 			pathBuffer = new List<Vector3>();
 			vertexBuffer = new List<Vector2>();
+
+			label.Text = "-";
 		}
 
 		protected override void OnEnable()
@@ -65,7 +110,14 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
+			Vector2 center = (FirstPosition + LastPosition) / 2;
+			(label.transform as RectTransform).anchoredPosition = transform.InverseTransformPoint(center);
 			SetVerticesDirty();
+		}
+
+		private void UpdateLabel()
+		{
+			label.Text = $"{metrics.DutyCycle * 100:0}%";
 		}
 
 		public bool OverlapsPoint(Vector2 position)

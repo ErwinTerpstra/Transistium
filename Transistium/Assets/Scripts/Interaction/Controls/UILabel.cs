@@ -9,6 +9,21 @@ namespace Transistium.Interaction
 	{
 		[SerializeField]
 		private bool keepUpright = true;
+		
+		[SerializeField]
+		private TMPro.TMP_Text textMesh = null;
+
+		public string Text
+		{
+			get => textMesh.text;
+			set => textMesh.text = value;
+		}
+
+		private void Awake()
+		{
+			if (!textMesh)
+				textMesh = GetComponent<TMPro.TMP_Text>();
+		}
 
 		private void LateUpdate()
 		{
