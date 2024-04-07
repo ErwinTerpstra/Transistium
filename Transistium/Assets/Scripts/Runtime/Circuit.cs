@@ -43,7 +43,7 @@ namespace Transistium.Runtime
 
 			// Tick resistors
 			for (int i = 0, c = resistors.Count; i < c; ++i)
-				resistors[i].Tick(current, next);
+				next.resistors[i] = resistors[i].Tick(current.resistors[i], current, next);
 
 			// Tick transistors
 			for (int i = 0, c = transistors.Count; i < c; ++i)

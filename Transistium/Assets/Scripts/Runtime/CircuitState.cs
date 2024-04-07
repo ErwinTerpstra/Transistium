@@ -12,6 +12,8 @@ namespace Transistium.Runtime
 
 		public readonly bool[] transistors;
 
+		public readonly CurrentDirection[] resistors;
+
 		public readonly Signal[] wires;
 
 		public CircuitState(Circuit circuit)
@@ -19,6 +21,7 @@ namespace Transistium.Runtime
 			this.circuit = circuit;
 
 			transistors = new bool[circuit.transistors.Count];
+			resistors = new CurrentDirection[circuit.resistors.Count];
 			wires = new Signal[circuit.WireCount];
 
 			Reset();
@@ -29,6 +32,7 @@ namespace Transistium.Runtime
 			circuit = other.circuit;
 
 			transistors = new bool[other.transistors.Length];
+			resistors = new CurrentDirection[other.resistors.Length];
 			wires = new Signal[other.wires.Length];
 
 			CopyFrom(other);
@@ -38,6 +42,9 @@ namespace Transistium.Runtime
 		{
 			for (int i = 0, c = transistors.Length; i < c; ++i)
 				transistors[i] = false;
+
+			for (int i = 0, c = resistors.Length; i < c; ++i)
+				resistors[i] = CurrentDirection.NONE;
 
 			for (int i = 0, c = wires.Length; i < c; ++i)
 				wires[i] = Signal.FLOATING;
@@ -49,6 +56,7 @@ namespace Transistium.Runtime
 		public void CopyFrom(CircuitState other)
 		{
 			Array.Copy(other.transistors, transistors, transistors.Length);
+			Array.Copy(other.resistors, resistors, resistors.Length);
 			Array.Copy(other.wires, wires, wires.Length);
 		}
 	}

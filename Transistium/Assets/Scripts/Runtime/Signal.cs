@@ -9,6 +9,13 @@ namespace Transistium.Runtime
 		HIGH = 2,
 	}
 
+	public enum CurrentDirection
+	{
+		NONE = 0,
+		FORWARD = 1,
+		REVERSE = 2
+	}
+
 	public static class SignalExtensions
 	{
 		public static bool ToLogicLevel(this Signal signal) => signal == Signal.HIGH;
@@ -16,6 +23,21 @@ namespace Transistium.Runtime
 
 	public static class SignalUtil
 	{
+		private static readonly Signal[] MergeTable =
+		{
+			// SRC				DST					Result
+			Signal.FLOATING,	Signal.FLOATING,	Signal.FLOATING,
+			Signal.FLOATING,    Signal.LOW,		    Signal.LOW,
+			Signal.FLOATING,    Signal.HIGH,	    Signal.HIGH,
+
+			Signal.LOW,			Signal.FLOATING,    Signal.LOW,
+			Signal.LOW,			Signal.LOW,			Signal.LOW,
+			Signal.LOW,			Signal.HIGH,		Signal.LOW,
+
+			Signal.HIGH,		Signal.FLOATING,    Signal.HIGH,
+			Signal.HIGH,        Signal.LOW,         Signal.LOW,
+			Signal.HIGH,        Signal.HIGH,        Signal.HIGH,
+		};
 
 		public static void Merge(Signal src, ref Signal dst)
 		{
@@ -24,15 +46,8 @@ namespace Transistium.Runtime
 
 		public static Signal Merge(Signal src, Signal dst)
 		{
-			// TODO: replace with lookup table
-			switch (dst)
-			{
-				default:
-				case Signal.FLOATING: return src;
-
-				case Signal.LOW: return Signal.LOW;
-				case Signal.HIGH: return src == Signal.LOW ? Signal.LOW : Signal.HIGH;
-			}
+			int index = ((int)src * 9) + ((int)dst * 3) + 2;
+			return MergeTable[index];
 		}
 	}
 
