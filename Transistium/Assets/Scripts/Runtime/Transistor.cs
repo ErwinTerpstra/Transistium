@@ -36,13 +36,13 @@ namespace Transistium.Runtime
 			Signal.HIGH,		Signal.FLOATING,    Signal.LOW,         Signal.LOW,			Signal.FLOATING,
 			Signal.HIGH,		Signal.FLOATING,    Signal.HIGH,        Signal.FLOATING,	Signal.FLOATING,
 
-			Signal.HIGH,		Signal.LOW,         Signal.FLOATING,    Signal.FLOATING,	Signal.LOW,
-			Signal.HIGH,		Signal.LOW,         Signal.LOW,         Signal.FLOATING,	Signal.FLOATING,
+			Signal.HIGH,		Signal.LOW,         Signal.FLOATING,    Signal.FLOATING,	Signal.FLOATING,
+			Signal.HIGH,		Signal.LOW,         Signal.LOW,         Signal.LOW,			Signal.FLOATING,
 			Signal.HIGH,		Signal.LOW,         Signal.HIGH,        Signal.FLOATING,	Signal.FLOATING,
 
 			Signal.HIGH,		Signal.HIGH,        Signal.FLOATING,    Signal.FLOATING,	Signal.HIGH,
 			Signal.HIGH,		Signal.HIGH,        Signal.LOW,         Signal.LOW,			Signal.FLOATING,
-			Signal.HIGH,		Signal.HIGH,        Signal.HIGH,        Signal.FLOATING,	Signal.FLOATING,
+			Signal.HIGH,		Signal.HIGH,        Signal.HIGH,        Signal.FLOATING,	Signal.HIGH,
 
 		};
 

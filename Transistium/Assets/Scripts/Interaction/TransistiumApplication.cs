@@ -111,7 +111,7 @@ namespace Transistium.Interaction
 			foreach (var componentInstance in compilationResult.componentInstances.All)
 			{
 				componentInstance.WriteToState(currentState);
-				componentInstance.WriteToState(nextState);
+				//componentInstance.WriteToState(nextState);
 			}
 		}
 		private void OnChipEnterred(Chip chip)
