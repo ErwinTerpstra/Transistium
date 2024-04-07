@@ -39,24 +39,17 @@ namespace Transistium.Interaction
 			compiler = new CircuitCompiler();
 			simulator = new CircuitSimulator();
 
+			simulator.BeforeUpdate += OnBeforeUpdate;
 			simulator.BeforeTick += OnBeforeTick;
 
 			manager.ChipEnterred += OnChipEnterred;
 		}
 
+
 		private void Update()
 		{
 			if (state == ApplicationState.SIMULATING)
-			{
-				float dt = Time.deltaTime;
-
-				manager.StoreComponentState(compilationResult.componentInstances);
-
-				foreach (var componentInstance in compilationResult.componentInstances.All)
-					componentInstance.Update(dt, simulator.CurrentState);
-
-				simulator.Update(dt);
-			}
+				simulator.Update(Time.deltaTime);
 
 			if (state != ApplicationState.DESIGNING)
 			{
@@ -104,6 +97,15 @@ namespace Transistium.Interaction
 			this.state = state;
 
 			StateChanged?.Invoke(state);
+		}
+
+		private void OnBeforeUpdate(CircuitState currentState, CircuitTime time)
+		{
+			manager.StoreComponentState(compilationResult.componentInstances);
+
+			foreach (var componentInstance in compilationResult.componentInstances.All)
+				componentInstance.Update(ref time, simulator.CurrentState);
+
 		}
 
 		private void OnBeforeTick(CircuitState currentState, CircuitState nextState)

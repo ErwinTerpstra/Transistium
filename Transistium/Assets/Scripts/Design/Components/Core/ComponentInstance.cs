@@ -28,11 +28,11 @@ namespace Transistium.Design.Components
 			stateAdapter = new ChipStateAdapter(component.Chip, chipMapping);
 		}
 
-		public void Update(float dt, CircuitState state)
+		public void Update(ref CircuitTime time, CircuitState state)
 		{
 			stateAdapter.Reset(state);
 
-			component.Update(dt, data, stateAdapter);
+			component.Update(ref time, data, stateAdapter);
 		}
 
 		public void WriteToState(CircuitState state)

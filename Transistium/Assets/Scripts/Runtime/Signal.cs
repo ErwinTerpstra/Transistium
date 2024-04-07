@@ -19,6 +19,8 @@ namespace Transistium.Runtime
 	public static class SignalExtensions
 	{
 		public static bool ToLogicLevel(this Signal signal) => signal == Signal.HIGH;
+
+		public static Signal Invert(this Signal signal) => (Signal) (2 - ((int)signal - 1));
 	}
 
 	public static class SignalUtil

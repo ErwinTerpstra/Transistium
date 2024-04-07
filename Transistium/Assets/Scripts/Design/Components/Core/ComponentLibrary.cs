@@ -54,6 +54,7 @@ namespace Transistium.Design.Components
 			var library = new ComponentLibrary();
 			library.RegisterComponent(new Button());
 			library.RegisterComponent(new Switch());
+			library.RegisterComponent(new SignalGenerator());
 
 			return library;
 		}

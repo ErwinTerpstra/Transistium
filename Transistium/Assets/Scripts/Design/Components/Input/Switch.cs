@@ -25,9 +25,9 @@ namespace Transistium.Design.Components
 			outputPin.direction = PinDirection.OUTPUT;
 		}
 
-		protected override void Update(float dt, Data data, ChipStateAdapter adapter)
+		protected override void Update(ref CircuitTime time, Data data, ChipStateAdapter adapter)
 		{
-			base.Update(dt, data, adapter);
+			base.Update(ref time, data, adapter);
 
 			adapter.Write(PIN_OUT, data.active ? Signal.HIGH : Signal.LOW);
 		}

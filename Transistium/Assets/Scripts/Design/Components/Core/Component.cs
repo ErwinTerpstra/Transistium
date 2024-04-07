@@ -18,7 +18,7 @@ namespace Transistium.Design.Components
 			SetupChip(chip);
 		}
 
-		public virtual void Update(float dt, ComponentData data, ChipStateAdapter adapter)
+		public virtual void Update(ref CircuitTime time, ComponentData data, ChipStateAdapter adapter)
 		{
 
 		}
@@ -36,14 +36,14 @@ namespace Transistium.Design.Components
 			return new DataType();
 		}
 
-		public override sealed void Update(float dt, ComponentData data, ChipStateAdapter adapter)
+		public override sealed void Update(ref CircuitTime time, ComponentData data, ChipStateAdapter adapter)
 		{
-			base.Update(dt, data, adapter);
+			base.Update(ref time, data, adapter);
 
-			Update(dt, data as DataType, adapter);
+			Update(ref time, data as DataType, adapter);
 		}
 
-		protected virtual void Update(float dt, DataType data, ChipStateAdapter adapter) { }
+		protected virtual void Update(ref CircuitTime time, DataType data, ChipStateAdapter adapter) { }
 	}
 
 	public class ComponentData
