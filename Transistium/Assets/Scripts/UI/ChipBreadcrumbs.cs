@@ -58,7 +58,7 @@ namespace Transistium.UI
 
 			if (level > 0)
 			{
-				var pair = circuitManager.ChipPath.ElementAt(level);
+				var pair = circuitManager.ChipPath.ElementAt(level - 1);
 				circuitManager.SwitchChip(pair.first, pair.second);
 			}
 			else

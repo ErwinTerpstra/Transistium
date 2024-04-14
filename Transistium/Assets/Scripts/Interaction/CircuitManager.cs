@@ -251,7 +251,16 @@ namespace Transistium.Interaction
 				activeChipStack.Clear();
 
 			if (chip != project.RootChip)
-				activeChipStack.Add(new Pair<Chip, ChipInstance>(chip, instance));
+			{
+				// Check if we are navigating up by searching for the target instance in the hierarchy stack
+				var pair = new Pair<Chip, ChipInstance>(chip, instance);
+				int index = activeChipStack.IndexOf(pair);
+
+				if (index >= 0)
+					activeChipStack.RemoveRange(index + 1, activeChipStack.Count - index - 1);
+				else
+					activeChipStack.Add(pair);
+			}
 
 			// Take this opportunity to update chip instances for changed properties
 			// (e.g. pin instances have been added/removed)
