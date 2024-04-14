@@ -263,12 +263,12 @@ namespace Transistium.Interaction
 
 		public void OnBeginDrag(PointerEventData eventData)
 		{
-			if (application.State != ApplicationState.DESIGNING)
-				return;
-
 			switch (eventData.button)
 			{
 				case PointerEventData.InputButton.Left:
+					if (application.State != ApplicationState.DESIGNING)
+						break;
+
 					if (selectedElement == null)
 					{
 						var junctionBehaviour = eventData.pointerPressRaycast.gameObject.GetComponentInParent<JunctionBehaviour>();
@@ -300,7 +300,7 @@ namespace Transistium.Interaction
 
 					break;
 
-				case PointerEventData.InputButton.Right:
+				case PointerEventData.InputButton.Right: 
 					cameraStartPosition = worldCamera.transform.position;
 					break;
 			}
