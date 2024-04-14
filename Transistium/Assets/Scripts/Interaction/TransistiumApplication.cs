@@ -32,7 +32,7 @@ namespace Transistium.Interaction
 		{
 			base.Awake();
 
-			Application.targetFrameRate = 60;
+			Application.targetFrameRate = 30;
 
 			manager = FindObjectOfType<CircuitManager>();
 
@@ -65,8 +65,13 @@ namespace Transistium.Interaction
 		{
 			if (state == ApplicationState.DESIGNING)
 			{
+				var project = manager.Project;
+
+				// Verify the project before compiling
+				project.VerifyIntegrity();
+
 				// Compile the circuit
-				compilationResult = compiler.Compile(manager.Project);
+				compilationResult = compiler.Compile(project);
 
 				// Setup the simulator
 				simulator.Prepare(compilationResult.circuit, tickRate);

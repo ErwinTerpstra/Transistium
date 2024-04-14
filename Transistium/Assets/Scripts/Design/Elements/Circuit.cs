@@ -115,7 +115,12 @@ namespace Transistium.Design
 		public void RemoveJunction(Junction junction)
 		{
 			for (int i = junction.wires.Count - 1; i >= 0; --i)
+			{
+				if (!junction.wires[i].IsValid)
+					continue;
+
 				RemoveWire(wires[junction.wires[i]]);
+			}
 
 			junctions.Remove(junction);
 		}
@@ -200,6 +205,12 @@ namespace Transistium.Design
 
 			foreach (var wireHandle in junction.wires)
 			{
+				if (!wireHandle.IsValid)
+				{
+					UnityEngine.Debug.LogWarning($"Found invalid wire handle in junction for chip ...");
+					continue;
+				}
+
 				var connectedJunction = GetConnectedJunction(junction, wires[wireHandle]);
 
 				if (connectedJunction != null && !connectedJunctions.Contains(connectedJunction))

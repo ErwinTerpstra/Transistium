@@ -125,6 +125,22 @@ namespace Transistium.Design
 			}
 		}
 
+		public void VerifyIntegrity()
+		{
+			foreach (var chip in chips)
+			{
+				var junctions = chip.circuit.junctions;
+
+				foreach (var junctionHandle in junctions.AllHandles)
+				{
+					var junction = junctions[junctionHandle];
+
+					if (junction.wires.Any(w => !w.IsValid))
+						UnityEngine.Debug.LogError($"Invalid wire reference found in junction {junctionHandle.guid} for chip {chip.name}");
+				}
+			}
+		}
+
 		public static Project Create()
 		{
 			var project = new Project(ComponentLibrary.Default);
