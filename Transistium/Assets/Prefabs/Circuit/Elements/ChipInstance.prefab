@@ -695,7 +695,7 @@ MonoBehaviour:
     m_Bottom: 10
   m_ChildAlignment: 0
   m_Spacing: 0
-  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
@@ -1216,6 +1216,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3471610756361141008, guid: 01dbe46c03c959a4ab5983f85d47f51a,
         type: 3}
+      propertyPath: m_fontSizeMax
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471610756361141008, guid: 01dbe46c03c959a4ab5983f85d47f51a,
+        type: 3}
+      propertyPath: m_fontSizeMin
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471610756361141008, guid: 01dbe46c03c959a4ab5983f85d47f51a,
+        type: 3}
       propertyPath: m_textAlignment
       value: 65535
       objectReference: {fileID: 0}
@@ -1241,6 +1251,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 01dbe46c03c959a4ab5983f85d47f51a, type: 3}
+--- !u!1 &5454287339077765132 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1249990130783023351, guid: 01dbe46c03c959a4ab5983f85d47f51a,
+    type: 3}
+  m_PrefabInstance: {fileID: 6550870527390841083}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5488733713528230447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5454287339077765132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
 --- !u!224 &6315845190413319737 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 959053095470696130, guid: 01dbe46c03c959a4ab5983f85d47f51a,
@@ -1253,7 +1289,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 6550870527390841083}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 5454287339077765132}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}

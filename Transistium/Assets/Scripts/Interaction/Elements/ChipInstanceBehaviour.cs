@@ -13,6 +13,13 @@ namespace Transistium.Interaction
 
 	public class ChipInstanceBehaviour : MonoBehaviour
 	{
+		public static readonly (int, int)[] FontSizes = 
+		{
+			(6, 18),
+			(10, 16),
+			(int.MaxValue, 14)
+		};
+
 		public event PinInstanceEvent PinInstanceCreated;
 		public event PinInstanceEvent PinInstanceDestroyed;
 
@@ -50,6 +57,7 @@ namespace Transistium.Interaction
 			pinInstances.DetectChanges();
 
 			label.text = chip.NameOrDefault;
+			label.fontSize = DetermineFontSize(label.text.Length);
 		}
 
 		public void Configure(Chip chip, ChipInstance chipInstance)
@@ -112,6 +120,17 @@ namespace Transistium.Interaction
 				group.padding.top = padding;
 				group.padding.bottom = padding;
 			}
+		}
+
+		private int DetermineFontSize(int textLength)
+		{
+			foreach ((int lengthTreshold, int fontSize) in FontSizes)
+			{
+				if (textLength <= lengthTreshold)
+					return fontSize;
+			}
+
+			return 0;
 		}
 	}
 
