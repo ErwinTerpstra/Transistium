@@ -1176,7 +1176,7 @@ MonoBehaviour:
   zoomSpeed: 3
   defaultZoomSize: 10
   minZoomSize: 10
-  maxZoomSize: 25
+  maxZoomSize: 40
 --- !u!114 &441463009
 MonoBehaviour:
   m_ObjectHideFlags: 0
