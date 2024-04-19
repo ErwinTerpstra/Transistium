@@ -150,23 +150,26 @@ namespace Transistium.Interaction
 
 				// NOTE: both A and B ends of the wire should connect to the same compiled wire index
 				int wireIndex = chipMapping.junctionMapping[junctionA ?? junctionB];
+				var wireMetrics = metrics.GetWireMetrics(wireIndex);
 
 				// Assign the signal to the wire behaviour
 				var signal = state.wires[wireIndex];
 				wireBehaviour.Signal = signal;
-				wireBehaviour.Metrics = metrics.GetWireMetrics(wireIndex);
+				wireBehaviour.Metrics = wireMetrics;
 
 				// Assign to junction behaviours as well
 				if (junctionA != null)
 				{
 					JunctionBehaviour junctionBehaviour = junctions.Mapping[junctionA];
 					junctionBehaviour.Signal = signal;
+					junctionBehaviour.Metrics = wireMetrics;
 				}
 
 				if (junctionB != null)
 				{
 					JunctionBehaviour junctionBehaviour = junctions.Mapping[junctionB];
 					junctionBehaviour.Signal = signal;
+					junctionBehaviour.Metrics = wireMetrics;
 				}
 			}
 		}

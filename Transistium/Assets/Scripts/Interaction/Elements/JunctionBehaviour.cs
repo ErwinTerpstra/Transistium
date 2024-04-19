@@ -22,6 +22,8 @@ namespace Transistium.Interaction
 
 		private Signal signal;
 
+		private WireMetrics metrics;
+
 		public Junction Junction
 		{
 			get => junction;
@@ -31,11 +33,18 @@ namespace Transistium.Interaction
 		public Signal Signal
 		{
 			get => signal;
-			set
-			{
-				signal = value;
-				graphic.color = signal.ToLogicLevel() ? activeColor : defaultColor;
-			}
+			set => signal = value;
+		}
+
+		public WireMetrics Metrics
+		{
+			get => metrics;
+			set => metrics = value;
+		}
+
+		private void Update()
+		{
+			graphic.color = Color.Lerp(defaultColor, activeColor, metrics.DutyCycle);
 		}
 	}
 }

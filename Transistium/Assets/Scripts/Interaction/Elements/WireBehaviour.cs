@@ -43,7 +43,7 @@ namespace Transistium.Interaction
 
 		public override Color color 
 		{
-			get => signal.ToLogicLevel() ? activeColor : base.color; 
+			get => Color.Lerp(base.color, activeColor, metrics.DutyCycle);// signal.ToLogicLevel() ? activeColor : base.color; 
 			set => base.color = value; 
 		}
 
@@ -99,6 +99,7 @@ namespace Transistium.Interaction
 			vertexBuffer = new List<Vector2>();
 
 			label.Text = "-";
+			label.gameObject.SetActive(false);
 		}
 
 		protected override void OnEnable()
@@ -110,6 +111,9 @@ namespace Transistium.Interaction
 
 		private void Update()
 		{
+			if (!CircuitManager.Instance)
+				return;
+
 			Vector2 center = (FirstPosition + LastPosition) / 2;
 			(label.transform as RectTransform).anchoredPosition = transform.InverseTransformPoint(center);
 			SetVerticesDirty();
